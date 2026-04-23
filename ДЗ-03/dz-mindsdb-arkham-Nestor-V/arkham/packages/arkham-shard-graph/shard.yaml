@@ -1,0 +1,52 @@
+name: graph
+version: 0.1.0
+description: Entity relationship graph analysis and visualization
+entry_point: arkham_shard_graph:GraphShard
+api_prefix: /api/graph
+requires_frame: ">=0.1.0"
+
+navigation:
+  category: Visualize
+  order: 40
+  icon: Network
+  label: Graph
+  route: /graph
+
+dependencies:
+  services:
+    - database
+    - events
+  optional:
+    - entities
+    - documents
+  shards: []
+
+capabilities:
+  - graph_visualization
+  - path_finding
+  - centrality_analysis
+  - community_detection
+  - graph_export
+  - subgraph_extraction
+
+events:
+  publishes:
+    - graph.graph.built
+    - graph.graph.updated
+    - graph.graph.exported
+    - graph.communities.detected
+    - graph.path.found
+  subscribes:
+    - entities.entity.created
+    - entities.entity.merged
+    - documents.document.deleted
+
+state:
+  strategy: url
+  url_params:
+    - projectId
+    - entityId
+    - depth
+
+ui:
+  has_custom_ui: true
