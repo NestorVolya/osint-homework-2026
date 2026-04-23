@@ -1,1 +1,0 @@
-export { ClaimsPage } from './ClaimsPage';
