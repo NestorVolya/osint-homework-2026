@@ -24,6 +24,27 @@ osint-homework-2026/
 │   ├── pipline Shoykhet.png   ← П2: OSINT pipeline схема
 │   └── ...
 │
+├── ДЗ-06-Nestor-V/            ← Теорія графів: патентний граф БЕК
+│   ├── README.md              ← опис, ключові знахідки, acceptance criteria
+│   ├── build_graph.py         ← xlsx → NetworkX → GEXF + CSV (Louvain, centrality)
+│   ├── requirements.txt       ← openpyxl, pandas (networkx вже встановлено)
+│   ├── theory_appendix.md     ← теорія: Louvain, Modularity Q, метрики графа
+│   ├── data/
+│   │   ├── patents_graph.gexf                    ← 7 869 вузлів, для Gephi
+│   │   ├── modularity-report.html                ← Gephi modularity HTML-звіт
+│   │   └── screenshots/
+│   │       ├── gephi-graph-overview.png           ← загальний вигляд графа
+│   │       ├── gephi-modularity-report.png        ← Q=0.956, 702 communities
+│   │       ├── gephi-colored-clusters.png         ← кластери за кольором
+│   │       ├── gephi-force-atlas2.png             ← Force Atlas 2 layout
+│   │       ├── gephi-data-laboratory.png          ← таблиця вузлів з Modularity Class
+│   │       └── communities-size-distribution.png  ← розподіл розмірів кластерів
+│   └── homework_cluster_summaries/
+│       ├── nodes_with_communities.csv ← 7 869 вузлів + Community_Python + Modularity_Class_Gephi
+│       ├── cluster_summaries.md       ← 5 кластерів + науковий персонал + LLM hallucination risks
+│       ├── prompt.md                  ← системний промпт для Claude Sonnet 4.6
+│       └── reviewer_notes.md          ← ручна перевірка AI-описів + збагачення Google Patents
+│
 └── ДЗ-03/                     ← MindsDB + ArkhamMirror SHATTERED
     ├── README.md              ← спільний огляд обох рівнів
     │

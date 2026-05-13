@@ -10,6 +10,7 @@
 | [ДЗ-03/](ДЗ-03/) | ДЗ-03 | MindsDB + ArkhamMirror SHATTERED |
 | [ДЗ-04-Nestor-V/](ДЗ-04-Nestor-V/) | ДЗ-04 | Mini-pipeline: Crawl4AI + Playwright + Prometheus (risu.ua) |
 | [ДЗ-05-Nestor-V/](ДЗ-05-Nestor-V/) | ДЗ-05 | Entity Resolution, граф зв'язків, Flowsint (🔵+🔴) |
+| [ДЗ-06-Nestor-V/](ДЗ-06-Nestor-V/) | ДЗ-06 | Теорія графів: патентний граф БЕК, Gephi modularity, LLM cluster descriptions (🔵+🔴) |
 
 ## Середовище та архітектура
 
@@ -31,8 +32,9 @@
 | ДЗ-04 | Розробка, git push | Crawl4AI pipeline (Docker) |
 | ДЗ-05 🔵 | Entity table, pyvis граф, collision | — |
 | ДЗ-05 🔴 | SSH tunnel → браузер | Flowsint (`make prod`, 6 контейнерів) |
+| ДЗ-06 🔵🔴 | Gephi + Python (networkx, pandas) | — |
 
 ### Стек
 
-Local: Python · pyvis · git  
+Local: Python · pyvis · networkx · pandas · Gephi · git  
 VPS: Docker · Traefik · Flowsint · Crawl4AI · n8n · PostgreSQL + pgvector

@@ -1,0 +1,51 @@
+name: contradictions
+version: 0.1.0
+description: Contradiction detection engine for multi-document analysis
+entry_point: arkham_shard_contradictions:ContradictionsShard
+api_prefix: /api/contradictions
+requires_frame: ">=0.1.0"
+
+navigation:
+  category: Analysis
+  order: 35
+  icon: Scale
+  label: Contradictions
+  route: /contradictions
+  badge_endpoint: /api/contradictions/pending/count
+  badge_type: count
+
+dependencies:
+  services:
+    - database
+    - events
+    - vectors
+  optional:
+    - llm
+  shards: []
+
+capabilities:
+  - contradiction_detection
+  - background_processing
+
+events:
+  publishes:
+    - contradictions.detected
+    - contradictions.confirmed
+    - contradictions.dismissed
+    - contradictions.chain_detected
+    - contradictions.status_updated
+    - contradictions.bulk_status_updated
+  subscribes:
+    - documents.document.created
+    - documents.document.updated
+    - embed.document.completed
+
+state:
+  strategy: url
+  url_params:
+    - status
+    - severity
+    - documentId
+
+ui:
+  has_custom_ui: true
