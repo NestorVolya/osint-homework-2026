@@ -7,7 +7,7 @@
 | 1 | EU DisinfoLab | Doppelganger: Media clones serving Russian propaganda | вер. 2022 | https://www.disinfo.eu/doppelganger/ | ✓ |
 | 2 | EU DisinfoLab | Doppelganger — повний звіт (PDF) | вер. 2022 | https://www.disinfo.eu/wp-content/uploads/2022/09/Doppelganger-1.pdf | ✓ |
 | 3 | EU DisinfoLab | Doppelganger Hub (агрегатор кампаній) | 2022–2024 | https://www.disinfo.eu/doppelganger-hub/ | ✓ |
-| 4 | EEAS / EUvsDisinfo | Doppelganger Strikes Back: FIMI Activities Targeting European Parliament Elections (PDF) | черв. 2024 | https://euvsdisinfo.eu/uploads/2024/06/EEAS-TechnicalReport-DoppelgangerEE24_June2024.pdf | ✓ |
+| 4 | EEAS / EUvsDisinfo | EEAS Technical Report on FIMI Threats: Doppelganger Strikes Back (PDF) | квіт. 2024 | https://euvsdisinfo.eu/uploads/2024/04/EEAS-DataTeam-TechnicalReport-FINAL.pdf | ✓ |
 | 5 | EEAS / EUvsDisinfo | Doppelganger Strikes Back — сторінка звіту | квіт. 2024 | https://euvsdisinfo.eu/doppelganger-strikes-back-unveiling-fimi-activities-targeting-european-parliament-elections/ | ⚠ 403 |
 
 ## Meta Adversarial Threat Reports
