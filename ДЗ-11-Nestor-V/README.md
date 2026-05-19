@@ -10,9 +10,9 @@
 
 - Обрано кейс **Doppelganger** (Italian campaign, 2022–2024) — клонування медіасайтів проросійськими акторами
 
-- Зібрано та верифіковано 8 першоджерел: EU DisinfoLab (2022), Meta Q3 2023, EEAS Technical Report (червень 2024), Euronews (09.2024), Correctiv (07.2024)
+- Зібрано та верифіковано 8 першоджерел: EU DisinfoLab (2022), Meta Q3 2023, EEAS Technical Report (квітень 2024), Euronews (09.2024), Correctiv (07.2024)
 
-- Описано 5 кейсів: клон ANSA/La Stampa/La Repubblica, наратив «санкції = катастрофа», 98 Meta-оголошень, 1 300+ постів на X під час виборів ЄП, VK-координація italian-targeting
+- Описано 5 кейсів: клон ANSA/`lastampa.in`/`repubblica.in` (зареєстровано 2024-04-05, заголовки *«Non c'è salvezza: l'UE distruggerà l'economia italiana»*, *«Bruxelles uccide»*), наратив «санкції = катастрофа», 98 Meta-оголошень, 1 300+ постів на X під час виборів ЄП, VK-координація italian-targeting
 
 - Визначено 6 методів роботи: typosquatting, платна реклама, обхід модерації, багатомовний контент, AI-генерація, VK-координація
 
