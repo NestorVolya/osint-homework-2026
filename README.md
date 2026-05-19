@@ -11,6 +11,7 @@
 | [ДЗ-04-Nestor-V/](ДЗ-04-Nestor-V/) | ДЗ-04 | Mini-pipeline: Crawl4AI + Playwright + Prometheus (risu.ua) |
 | [ДЗ-05-Nestor-V/](ДЗ-05-Nestor-V/) | ДЗ-05 | Entity Resolution, граф зв'язків, Flowsint (🔵+🔴) |
 | [ДЗ-06-Nestor-V/](ДЗ-06-Nestor-V/) | ДЗ-06 | Теорія графів: патентний граф БЕК, Gephi modularity, LLM cluster descriptions (🔵+🔴) |
+| [ДЗ-11-Nestor-V/](ДЗ-11-Nestor-V/) | ДЗ-11 | Міні-OSINT-звіт: операція Doppelganger (Italian campaign, 2022–2024) — клонування медіа, наративи, EEAS/Meta/Correctiv |
 
 ## Середовище та архітектура
 
@@ -33,6 +34,7 @@
 | ДЗ-05 🔵 | Entity table, pyvis граф, collision | — |
 | ДЗ-05 🔴 | SSH tunnel → браузер | Flowsint (`make prod`, 6 контейнерів) |
 | ДЗ-06 🔵🔴 | Gephi + Python (networkx, pandas) | — |
+| ДЗ-11 | OSINT-звіт: Doppelganger Italy (Markdown + HTML) | — |
 
 ### Стек
 

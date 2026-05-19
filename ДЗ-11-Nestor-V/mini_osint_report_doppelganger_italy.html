@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Міні-OSINT-звіт: Doppelganger — Italian Campaign</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; color: #1a1a1a; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #1a1a1a; padding-bottom: .5rem; margin-bottom: .5rem; }
+    .meta { font-size: .875rem; color: #555; margin-bottom: 2rem; }
+    .meta strong { color: #1a1a1a; }
+    h2 { font-size: 1.1rem; margin-top: 2rem; padding: .3rem .6rem; background: #f0f0f0; border-left: 3px solid #333; }
+    h3 { font-size: 1rem; margin-top: 1.5rem; color: #222; }
+    p { margin: .6rem 0; }
+    ul, ol { margin: .5rem 0; padding-left: 1.5rem; }
+    li { margin: .3rem 0; }
+    code { background: #f4f4f4; padding: .1rem .3rem; border-radius: 3px; font-size: .9em; }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; margin: 1rem 0; }
+    th { background: #1a1a1a; color: #fff; padding: .5rem .75rem; text-align: left; }
+    td { padding: .45rem .75rem; border: 1px solid #ddd; vertical-align: top; }
+    tr:nth-child(even) td { background: #fafafa; }
+    a { color: #1a56db; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 1.5rem 0; }
+    .ai-box { background: #fffbeb; border-left: 3px solid #f59e0b; padding: .75rem 1rem; font-size: .9rem; margin: 1rem 0; }
+
+    /* Footnote superscripts */
+    sup a { font-size: .75em; color: #1a56db; font-weight: 600; text-decoration: none; }
+    sup a:hover { text-decoration: underline; }
+
+    /* Sources list */
+    .sources { margin-top: 1rem; }
+    .sources ol { padding-left: 1.4rem; }
+    .sources li { margin: .6rem 0; font-size: .875rem; }
+    .sources li a { word-break: break-all; }
+    .src-id { font-weight: 700; }
+
+    footer { margin-top: 2.5rem; font-size: .8rem; color: #888; border-top: 1px solid #eee; padding-top: .75rem; }
+  </style>
+</head>
+<body>
+
+<h1>Міні-OSINT-звіт: Doppelganger — Italian Campaign</h1>
+<div class="meta">
+  <strong>Курс:</strong> OSINT &nbsp;|&nbsp;
+  <strong>Студент:</strong> Nestor-V &nbsp;|&nbsp;
+  <strong>Дата:</strong> 2026-05-19 &nbsp;|&nbsp;
+  <strong>Кейс:</strong> Операція Doppelganger (фокус: Італія, 2022–2024)
+</div>
+
+<hr>
+
+<h2>1. Короткий опис</h2>
+
+<p><strong>Doppelganger</strong> (також відома як Recent Reliable News / RRN) — проросійська операція інформаційного впливу, що розпочалась не пізніше лютого 2022 року. Операція стала публічно відомою у вересні 2022 року після розслідування EU DisinfoLab.<sup><a href="#src1">[1]</a></sup></p>
+
+<p>Суть операції: масове клонування вебсайтів авторитетних медіа (typosquatting), публікація на них сфальшованих матеріалів та їхнє розповсюдження через соціальні мережі.</p>
+
+<p><strong>Атрибуція:</strong> у грудні 2022 року Meta вперше публічно атрибутувала операцію двом російським компаніям — <strong>Social Design Agency (SDA)</strong> та <strong>Structura National Technologies</strong>.<sup><a href="#src4">[4]</a></sup> У липні 2023 року ЄС запровадив санкції проти цих організацій. У 2024 році Міністерство фінансів США також санкціонувало ці структури.<sup><a href="#src5">[5]</a></sup></p>
+
+<p>Операція залишається активною станом на 2024–2025 роки, адаптуючи методи у відповідь на блокування.<sup><a href="#src7">[7]</a></sup></p>
+
+<hr>
+
+<h2>2. Основні приклади активності (5 кейсів)</h2>
+
+<h3>Кейс 1. Клонування ANSA, La Stampa, La Repubblica (2022–2024)</h3>
+<p>Серед задокументованих дій — клонування вебсайтів <strong>ANSA</strong> (провідне інф. агентство), <strong>La Stampa</strong> та <strong>La Repubblica</strong> (найбільші щоденні газети Італії). Домен <code>ansa.ltd</code> імітував оригінальний <code>ansa.it</code>. Домени La Stampa і La Repubblica зареєстровано між січнем і травнем 2024 року напередодні виборів до ЄП.<sup><a href="#src1">[1]</a><a href="#src6">[6]</a></sup></p>
+
+<h3>Кейс 2. Наратив «санкції проти Росії = катастрофа для Італії» (2022–2023)</h3>
+<p>Одним із основних меседжів для італійської аудиторії були матеріали, що нагнітали страх перед економічними наслідками антиросійських санкцій. Мета — формувати суспільний опір підтримці України.<sup><a href="#src2">[2]</a><a href="#src7">[7]</a></sup></p>
+
+<h3>Кейс 3. Рекламні кампанії на Meta (2023)</h3>
+<p>Meta виявила щонайменше <strong>98 рекламних оголошень</strong>, що просували проросійський контент Doppelganger у Франції, Німеччині, Польщі та <strong>Італії</strong>. Контент поширювався через фейкові сторінки та вів до клонованих медіасайтів. Облікові записи були видалені Meta до публікації звіту.<sup><a href="#src4">[4]</a></sup></p>
+
+<h3>Кейс 4. Активність під час виборів до Європарламенту (червень 2024)</h3>
+<p>Упродовж 4–28 червня 2024 року зафіксовано понад <strong>1 300 проросійських публікацій</strong> від мережі Doppelganger на платформі X (колишній Twitter). Загальна кількість переглядів — <strong>4,6 мільйона</strong>. Незважаючи на звернення EDMO до X через Digital Services Act, більшість акаунтів не була заблокована протягом шести тижнів.<sup><a href="#src7">[7]</a></sup></p>
+
+<h3>Кейс 5. Координація через VK — підтвердження Italian audience targeting (2024)</h3>
+<p>Розслідування Correctiv (липень 2024) виявило внутрішні чати команди Doppelganger у VK. На одному зі скриншотів зафіксовано символ піци поряд з координацією поширення контенту — підтвердження цілеспрямованої роботи з <strong>italian-language контентом</strong>. Технічна інфраструктура (сервери Hetzner у Фінляндії, Aurologic у Німеччині) була спільною для всіх країн, включно з Італією.<sup><a href="#src8">[8]</a></sup></p>
+
+<hr>
+
+<h2>3. Методи роботи</h2>
+<ul>
+  <li><strong>Клонування медіасайтів (typosquatting):</strong> реєстрація доменів, схожих на оригінал (<code>.ltd</code>, <code>.online</code>, <code>.foo</code> замість <code>.it</code>, <code>.com</code>). Серед клонованих: ANSA, Der Spiegel, Le Monde, The Guardian, Fox News, Bild<sup><a href="#src1">[1]</a><a href="#src6">[6]</a></sup></li>
+  <li><strong>Соціальні мережі:</strong> платна реклама та органічне поширення через Facebook, Instagram, X (Twitter)<sup><a href="#src4">[4]</a><a href="#src7">[7]</a></sup></li>
+  <li><strong>Обхід систем модерації:</strong> використання символів і пробілів для маскування URL у публікаціях<sup><a href="#src7">[7]</a></sup></li>
+  <li><strong>Багатомовний контент:</strong> матеріали створювались окремо для кожної цільової аудиторії, зокрема італійською мовою<sup><a href="#src4">[4]</a></sup></li>
+  <li><strong>AI-генерований контент (2024+):</strong> за даними звітів, операція почала використовувати AI для масштабування контентного виробництва<sup><a href="#src5">[5]</a></sup></li>
+  <li><strong>Координація через закриті платформи:</strong> VK як канал внутрішньої комунікації між виконавцями<sup><a href="#src8">[8]</a></sup></li>
+</ul>
+
+<hr>
+
+<h2>4. Основні наративи</h2>
+<ol>
+  <li><strong>Економічний страх:</strong> санкції проти Росії = зростання цін і рецесія для Італії та Європи<sup><a href="#src2">[2]</a></sup></li>
+  <li><strong>Дискредитація підтримки України:</strong> Зеленський = корупційний режим, підтримка України = марнування грошей платників податків<sup><a href="#src1">[1]</a><a href="#src6">[6]</a></sup></li>
+  <li><strong>Антинатовський меседж:</strong> НАТО як загроза миру в Європі, вихід з Альянсу = безпека<sup><a href="#src6">[6]</a></sup></li>
+  <li><strong>Підтримка євроскептиків:</strong> контент просував праві партії та кандидатів, лояльних до Росії, напередодні виборів до ЄП 2024<sup><a href="#src5">[5]</a><a href="#src7">[7]</a></sup></li>
+  <li><strong>Підрив довіри до ЗМІ:</strong> через клонування авторитетних медіа операція розмивала межу між справжнім і фейковим<sup><a href="#src3">[3]</a></sup></li>
+</ol>
+
+<hr>
+
+<h2>5. Таблиця кейсів</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Дата / Період</th>
+      <th>Кейс / Кампанія</th>
+      <th>Країна / Аудиторія</th>
+      <th>Метод</th>
+      <th>Джерело</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Лютий–вересень 2022</td>
+      <td>Клон ANSA (<code>ansa.ltd</code>) — публікація сфальшованих матеріалів</td>
+      <td>Італія</td>
+      <td>Typosquatting, fake news site</td>
+      <td><a href="https://www.disinfo.eu/doppelganger/" target="_blank">EU DisinfoLab, вер. 2022</a></td>
+    </tr>
+    <tr>
+      <td>2022–2023</td>
+      <td>Наратив «санкції = економічна катастрофа для Італії»</td>
+      <td>Італія</td>
+      <td>Multi-platform content, social media</td>
+      <td><a href="https://www.disinfo.eu/wp-content/uploads/2022/09/Doppelganger-1.pdf" target="_blank">EU DisinfoLab звіт (PDF)</a></td>
+    </tr>
+    <tr>
+      <td>2023</td>
+      <td>98 платних рекламних оголошень на Meta (France/Germany/Poland/Italy)</td>
+      <td>Італія, ЄС</td>
+      <td>Paid ads, Facebook/Instagram</td>
+      <td><a href="https://transparency.meta.com/sr/Q3-2023-Adversarial-threat-report/" target="_blank">Meta Q3 2023 Threat Report</a></td>
+    </tr>
+    <tr>
+      <td>Червень 2024</td>
+      <td>1 300+ публікацій на X під час виборів до ЄП, 4,6 млн переглядів</td>
+      <td>ЄС / Італія</td>
+      <td>X/Twitter coordinated posting</td>
+      <td><a href="https://www.euronews.com/next/2024/09/05/threat-is-ongoing-as-russian-doppelganger-operation-continues-on-x-and-meta-despite-eu-pro" target="_blank">Euronews, 05.09.2024</a></td>
+    </tr>
+    <tr>
+      <td>Липень 2024</td>
+      <td>VK-чати: підтвердження italian-language targeting</td>
+      <td>Італія</td>
+      <td>Internal coordination, VK</td>
+      <td><a href="https://correctiv.org/en/fact-checking-en/2024/07/22/inside-doppelganger-how-russia-uses-eu-companies-for-its-propaganda/" target="_blank">Correctiv, 22.07.2024</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2>6. Висновок</h2>
+
+<p><strong>Масштаб і системність.</strong> Операція не є спонтанною — вона структурована, фінансується комерційними суб'єктами (SDA, Structura), використовує рекламні бюджети та координується через закриті платформи.<sup><a href="#src8">[8]</a></sup></p>
+
+<p><strong>Адаптивність.</strong> Попри санкції (ЄС 2023, США 2024), численні takedowns від Meta та X, операція продовжується, змінюючи домени та тактики. Це ознака стійкої інституційної підтримки.<sup><a href="#src7">[7]</a></sup></p>
+
+<p><strong>Вибір Італії як мети.</strong> Значний євроскептицизм, наявність проросійських політичних сил, чутливість до економічної тематики — все це робить Італію пріоритетною аудиторією для Kremlin-aligned операцій.<sup><a href="#src6">[6]</a></sup></p>
+
+<p><strong>Розмивання інформаційного простору.</strong> Клонування авторитетних медіа (ANSA) спрямоване не лише на поширення конкретних наративів, а й на системне зниження довіри до медіа загалом.<sup><a href="#src1">[1]</a></sup></p>
+
+<hr>
+
+<h2>AI-компонент</h2>
+<div class="ai-box">
+  У роботі AI використовувався як допоміжний інструмент для структурування матеріалів, короткого резюмування джерел, виділення ключових фактів та групування наративів. Пошук джерел виконувався через відкриті вебзапити (WebSearch/WebFetch) до публічних звітів EU DisinfoLab, Meta, Euronews та Correctiv. Усі фактичні твердження перевірені за відкритими джерелами. AI не використовувався як самостійне джерело фактів.
+</div>
+
+<hr>
+
+<h2>7. Джерела</h2>
+<div class="sources">
+<ol>
+  <li id="src1"><strong>EU DisinfoLab</strong> — <em>Doppelganger: Media clones serving Russian propaganda</em>, вересень 2022<br>
+    <a href="https://www.disinfo.eu/doppelganger/" target="_blank">https://www.disinfo.eu/doppelganger/</a></li>
+
+  <li id="src2"><strong>EU DisinfoLab</strong> — Повний звіт (PDF), вересень 2022<br>
+    <a href="https://www.disinfo.eu/wp-content/uploads/2022/09/Doppelganger-1.pdf" target="_blank">https://www.disinfo.eu/wp-content/uploads/2022/09/Doppelganger-1.pdf</a></li>
+
+  <li id="src3"><strong>EU DisinfoLab</strong> — Doppelganger Hub (агрегатор кампаній)<br>
+    <a href="https://www.disinfo.eu/doppelganger-hub/" target="_blank">https://www.disinfo.eu/doppelganger-hub/</a></li>
+
+  <li id="src4"><strong>Meta Transparency Center</strong> — Quarterly Adversarial Threat Report Q3 2023<br>
+    <a href="https://transparency.meta.com/sr/Q3-2023-Adversarial-threat-report/" target="_blank">https://transparency.meta.com/sr/Q3-2023-Adversarial-threat-report/</a></li>
+
+  <li id="src5"><strong>Meta Transparency Center</strong> — Integrity Reports Q1 2024<br>
+    <a href="https://transparency.meta.com/integrity-reports-q1-2024/" target="_blank">https://transparency.meta.com/integrity-reports-q1-2024/</a></li>
+
+  <li id="src6"><strong>EUvsDisinfo / EEAS</strong> — <em>Doppelganger Strikes Back: FIMI Activities Targeting European Parliament Elections</em>, червень 2024<br>
+    <a href="https://euvsdisinfo.eu/uploads/2024/06/EEAS-TechnicalReport-DoppelgangerEE24_June2024.pdf" target="_blank">https://euvsdisinfo.eu/uploads/2024/06/EEAS-TechnicalReport-DoppelgangerEE24_June2024.pdf</a></li>
+
+  <li id="src7"><strong>Euronews</strong> — <em>'Threat is ongoing' as Russian Doppelganger operation continues on X and Meta despite EU probe</em>, 5 вересня 2024<br>
+    <a href="https://www.euronews.com/next/2024/09/05/threat-is-ongoing-as-russian-doppelganger-operation-continues-on-x-and-meta-despite-eu-pro" target="_blank">https://www.euronews.com/next/2024/09/05/threat-is-ongoing…</a></li>
+
+  <li id="src8"><strong>Correctiv</strong> — <em>Inside Doppelganger: How Russia uses EU companies for its propaganda</em>, 22 липня 2024<br>
+    <a href="https://correctiv.org/en/fact-checking-en/2024/07/22/inside-doppelganger-how-russia-uses-eu-companies-for-its-propaganda/" target="_blank">https://correctiv.org/en/fact-checking-en/2024/07/22/inside-doppelganger…</a></li>
+</ol>
+</div>
+
+<footer>ДЗ-11 · OSINT курс · Nestor-V · 2026-05-19</footer>
+
+</body>
+</html>
