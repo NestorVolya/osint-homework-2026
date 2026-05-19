@@ -22,7 +22,7 @@
 ## 2. Основні приклади активності (5 кейсів)
 
 ### Кейс 1. Клонування ANSA, La Stampa, La Repubblica (2022–2024)
-Серед задокументованих дій — клонування вебсайтів **ANSA** (провідне інф. агентство), **La Stampa** та **La Repubblica** (найбільші щоденні газети Італії). [Домен `ansa.ltd` імітував оригінальний `ansa.it`](https://www.disinfo.eu/doppelganger/) — одне з перших задокументованих клонувань в рамках операції. [Домени La Stampa і La Repubblica зареєстровано між січнем і травнем 2024 року](https://euvsdisinfo.eu/uploads/2024/06/EEAS-TechnicalReport-DoppelgangerEE24_June2024.pdf) напередодні виборів до ЄП.
+Серед задокументованих дій — клонування вебсайтів **ANSA** (провідне інф. агентство), **La Stampa** та **La Repubblica** (найбільші щоденні газети Італії). [Домен `ansa.ltd` імітував оригінальний `ansa.it`](https://www.disinfo.eu/doppelganger/) — одне з перших задокументованих клонувань в рамках операції. [За даними EEAS Technical Report (квітень 2024)](https://euvsdisinfo.eu/uploads/2024/04/EEAS-DataTeam-TechnicalReport-FINAL.pdf), домени **`lastampa.in`** і **`repubblica.in`** зареєстровано **5 квітня 2024 року** (Target: Italy). На `lastampa.in` розміщено 6 статей про вибори, на `repubblica.in` — 5. Серед зафіксованих заголовків: *«Non c'è salvezza: l'UE distruggerà l'economia italiana»* та *«Bruxelles uccide»*.
 
 ### Кейс 2. Наратив «санкції проти Росії = катастрофа для Італії» (2022–2023)
 Одним із основних меседжів для італійської аудиторії були матеріали, що нагнітали страх перед економічними наслідками антиросійських санкцій. [EU DisinfoLab зафіксував цей наратив](https://www.disinfo.eu/wp-content/uploads/2022/09/Doppelganger-1.pdf) як один із ключових у вересні 2022 року. Мета — формувати суспільний опір підтримці України серед економічно чутливої аудиторії.
@@ -150,8 +150,8 @@
 5. **Meta Transparency Center** — Integrity Reports Q1 2024  
    https://transparency.meta.com/integrity-reports-q1-2024/
 
-6. **EUvsDisinfo / EEAS** — *Doppelganger Strikes Back: FIMI Activities Targeting European Parliament Elections*, червень 2024  
-   https://euvsdisinfo.eu/uploads/2024/06/EEAS-TechnicalReport-DoppelgangerEE24_June2024.pdf
+6. **EUvsDisinfo / EEAS** — *EEAS Technical Report on FIMI Threats: Doppelganger Strikes Back*, квітень 2024  
+   https://euvsdisinfo.eu/uploads/2024/04/EEAS-DataTeam-TechnicalReport-FINAL.pdf
 
 7. **Euronews** — *'Threat is ongoing' as Russian Doppelganger operation continues on X and Meta despite EU probe*, 5 вересня 2024  
    https://www.euronews.com/next/2024/09/05/threat-is-ongoing-as-russian-doppelganger-operation-continues-on-x-and-meta-despite-eu-pro
