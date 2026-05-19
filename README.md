@@ -15,6 +15,19 @@
 
 ## Середовище та архітектура
 
+Репозиторій живе у `D:\projects\` — workspace class **`producer_workspace`** за канонічною архітектурою `AI-Osint-EDU` (`D:\AI\ARCHITECTURE.md`).
+
+### Workspace roles (скорочено)
+
+| Root | Class | Роль |
+|---|---|---|
+| `D:\AI` | `control_plane` | Архітектура, рішення, плани, логи |
+| `D:\projects\osint-homework-2026` | `producer_workspace` | Цей курс: sandbox, ДЗ, прототипи |
+| `D:\dev\osint-base` | `data_core` | Durable OSINT data core (схема, API, records) |
+| `ssh://hostinger-vps` | `vps_execution` | 24/7 сервіси, Docker runtime |
+
+> Projects are replaceable. Data core is durable.
+
 ### Принцип: Local = розробка, VPS = виконання
 
 | | Local (Windows 10) | VPS (Ubuntu 24.04) |
