@@ -45,6 +45,14 @@ osint-homework-2026/
 │       ├── prompt.md                  ← системний промпт для Claude Sonnet 4.6
 │       └── reviewer_notes.md          ← ручна перевірка AI-описів + збагачення Google Patents
 │
+├── ДЗ-11-Nestor-V/            ← OSINT: Doppelganger (Italian campaign 2022–2024)
+│   ├── README.md
+│   ├── mini_osint_report_doppelganger_italy.md  ← основний звіт: опис, 5 кейсів, методи, наративи
+│   ├── mini_osint_report_doppelganger_italy.html ← HTML з нумерованими виносками-посиланнями
+│   ├── sources.md                                ← таблиця 16 джерел зі статусом перевірки
+│   ├── sources.html                              ← HTML-версія (клікабельні лінки)
+│   └── screenshots/                              ← 16 скріншотів першоджерел
+│
 └── ДЗ-03/                     ← MindsDB + ArkhamMirror SHATTERED
     ├── README.md              ← спільний огляд обох рівнів
     │
@@ -78,4 +86,47 @@ osint-homework-2026/
             ├── 02-mindsdb-studio-editor.png
             ├── 03-docker-desktop-stats.png
             └── 04-gordon-setup-complete.png
+```
+
+---
+
+## Шаблон оформлення ДЗ
+
+### README.md (інтро-блок)
+
+```
+**ДЗ-XX — [Назва теми] · Basic 🔵 [+ Advanced 🔴]**
+
+Хто / чим: студент Nestor-V + Claude Code (агент); [інструменти]
+
+ТУТ: https://github.com/NestorVolya/osint-homework-2026/tree/main/ДЗ-XX-Nestor-V
+
+**Зроблено:**
+
+- [bullet 1]
+- [bullet 2]
+- ...
+
+**Де:** Local (Windows 10) [/ VPS] — [інструменти]
+
+---
+
+## Структура здачі
+
+| Файл | Зміст |
+|---|---|
+| [файл.md](файл.md) | Опис |
+
+## Acceptance Criteria — самоперевірка
+
+### 🔵 Базовий
+
+- [x] Критерій 1
+- [x] Критерій 2
+```
+
+### Каталог ДЗ (рядок у головному README.md)
+
+```
+| ДЗ-XX | [Назва](ДЗ-XX-Nestor-V/) | Короткий опис | 🔵 Basic |
 ```
