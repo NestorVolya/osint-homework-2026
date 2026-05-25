@@ -53,6 +53,31 @@ osint-homework-2026/
 │   ├── sources.html                              ← HTML-версія (клікабельні лінки)
 │   └── screenshots/                              ← 16 скріншотів першоджерел
 │
+├── ДЗ-12-Nestor-V/            ← Кластеризація Telegram-каналів: GroupInt + Neo4j + Gephi
+│   ├── README.md
+│   ├── AI_OSINT_HW_Clustering_PatternMatching_Nestor-V.md  ← основний OSINT-звіт
+│   ├── PLAN.md                                            ← план виконання
+│   ├── SCREENSHOTS.md                                     ← перелік скріншотів
+│   ├── VPS_RUNTIME_STATUS.md                              ← VPS/Traefik/GroupInt runtime notes
+│   ├── data/
+│   │   ├── nodes_with_communities.csv                     ← вузли, clusters, centrality metrics
+│   │   ├── edges_endorsements.csv                         ← ребра ENDORSES з weight/raw links/message ids
+│   │   └── gephi_ai_summary.md                            ← підсумок Gephi MCP аналізу
+│   ├── scripts/
+│   │   └── gephi_mcp_run.py                               ← відтворення Gephi AI/MCP аналізу
+│   └── screenshots/
+│       ├── 01-hostinger-docker-manager-projects.png
+│       ├── 03-hostinger-docker-manager-groupint-compose-setup.png
+│       ├── 04-groupint-telegram-session-saved-sensitive.png
+│       ├── 05-groupint-target-republic-of-gagauzia-selected.png
+│       ├── 08-groupint-republic-endorsements-663-dark.png
+│       ├── 10-gephi-neo4j-import-group-endorsements.png
+│       ├── 13-gephi-expanded-modularity-70nodes.png
+│       ├── 15-gephi-data-lab-top-weighted-degree.png
+│       ├── 16-gephi-data-lab-top-endorsement-edges.png
+│       ├── 17-gephi-ai-analysis-export.png
+│       └── telegram-endorsements-expanded-gephi-ai.gephi
+│
 └── ДЗ-03/                     ← MindsDB + ArkhamMirror SHATTERED
     ├── README.md              ← спільний огляд обох рівнів
     │

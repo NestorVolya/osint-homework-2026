@@ -5,6 +5,9 @@
 !*.env.example
 __pycache__/
 *.pyc
+.venv/
+*/.venv/
+streamlit-hello*.log
 .DS_Store
 Thumbs.db
 arkham/packages/
