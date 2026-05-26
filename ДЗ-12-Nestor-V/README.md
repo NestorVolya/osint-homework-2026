@@ -1,5 +1,7 @@
 # ДЗ-12 — кластеризація Telegram-мереж і візуалізація графів · Basic + Advanced
 
+![Gephi endorsement graph](screenshots/17-gephi-ai-analysis-export.png)
+
 Хто / чим: студент Nestor-V + Claude Code; GroupInt, Telegram API, Neo4j, Gephi, gephi-ai MCP, VPS Docker stack.
 
 Тут: https://github.com/NestorVolya/osint-homework-2026/tree/main/ДЗ-12-Nestor-V
@@ -47,11 +49,6 @@
 | [screenshots/](screenshots/) | скріншоти GroupInt, Neo4j/Gephi імпорту, метрик і графів |
 | [screenshots/17-gephi-ai-analysis-export.png](screenshots/17-gephi-ai-analysis-export.png) | фінальний експорт графа через gephi-ai |
 | [screenshots/telegram-endorsements-expanded-gephi-ai.gephi](screenshots/telegram-endorsements-expanded-gephi-ai.gephi) | збережений Gephi-проєкт після MCP аналізу |
-| [VPS_RUNTIME_STATUS.md](VPS_RUNTIME_STATUS.md) | короткий опис VPS/Traefik/GroupInt runtime |
-| [PLAN.md](PLAN.md) | робочий план виконання |
-| [SCREENSHOTS.md](SCREENSHOTS.md) | перелік потрібних скріншотів |
-| [GAP_FIX_STATE.md](GAP_FIX_STATE.md) | стан перевірки вимог викладача і виправлені прогалини |
-| [SESSION_EXECUTION_PLAN.md](SESSION_EXECUTION_PLAN.md) | структурований опис усієї робочої сесії |
 
 ## Acceptance Criteria — самоперевірка
 
