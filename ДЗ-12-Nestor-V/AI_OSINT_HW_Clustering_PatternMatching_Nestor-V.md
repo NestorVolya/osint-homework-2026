@@ -84,6 +84,23 @@ neo4j://localhost:17687
 |---|---|
 | `data/nodes_with_communities.csv` | вузли з community class, degree, weighted degree, PageRank |
 | `data/edges_endorsements.csv` | ребра `ENDORSES` з вагою, raw link і message id |
+| `data/raw/groupint_messages.csv` | 15100 повідомлень з Neo4j / GroupInt, 11781 з непорожнім текстом |
+| `data/processed/nodes_clean.csv` | вузли після conservative deduplication |
+| `data/processed/edges_endorsements_clean.csv` | ребра після conservative deduplication |
+| `data/processed/text_patterns.csv` | exact/similar text pattern matching |
+| `data/processed/synchronized_posts.csv` | синхронні exact-text публікації |
+| `data/processed/channel_roles.csv` | ролі каналів за графовими ознаками |
+
+### Очищення дублікатів і шуму
+
+Первинний graph export містив 70 вузлів і 68 ребер. Після conservative deduplication отримано 60 вузлів і 58 ребер. Очищення виконано тільки для очевидних typo-варіантів, без автоматичного fuzzy-злиття різних каналів.
+
+Злиті alias-приклади:
+
+- `MoldovaPolitcis`, `MoldovaPolitcs`, `ModovaPolitics`, `MoldovaPolitisc`, `MolodovaPolitics`, `MoldovaPolotics`, `MoldovaPoitics`, `MoldovaPoolitics`, `MoldovaPoltics` -> `MoldovaPolitics`;
+- `primulinm` -> `primulinmd`.
+
+Технічні bot/CTA вузли не видалялися автоматично, а лишені у графі з окремою інтерпретацією ролей. Повний протокол: `data/processed/deduplication_notes.md`.
 
 ## 4. Основні кластери
 
@@ -154,7 +171,90 @@ MoldovaPolitics -> turan_express, weight 9, raw link @turan_express
 
 Ваги цих зв'язків нижчі, ніж у головному Gagauzia-кластері, але вони формують окремий інформаційний сегмент.
 
-## 7. Висновки
+### Патерн 4: однакові формулювання / тези
+
+Після експорту `Message` nodes з Neo4j сформовано `data/raw/groupint_messages.csv`: 15100 унікальних повідомлень, з них 11781 мають непорожній текст. Скрипт `scripts/analyze_text_patterns.py` знайшов 9 exact `same_text` патернів між різними каналами.
+
+Приклади повторюваних тем із `data/processed/pattern_examples.md`:
+
+| Канали | Тип | Тема / короткий зміст |
+|---|---|---|
+| `MoldovaPolitics;gagauznewsmd` | `same_text` | "гагаузьке питання" в СРСР та історична ідентичність |
+| `MoldovaPolitics;gagauznewsmd` | `same_text` | захист росіян у Придністров'ї та згадка Одеси |
+| `MoldovaPolitics;gagauznewsmd` | `same_text` | критика Майї Санду як "диктатора" |
+| `MoldovaPolitics;gagauznewsmd` | `same_text` | антисанду-наратив через цитату Таубер |
+| `Republic_Of_GaGauZia;pridnestrovec` | `same_text` | повідомлення про російське громадянство для жителів Придністров'я |
+
+### Патерн 5: синхронні публікації
+
+Після очищення від порожніх текстів залишено 4 валідні синхронні exact-text вікна у `data/processed/synchronized_posts.csv`. Усі 4 зафіксовані між `MoldovaPolitics` і `gagauznewsmd`.
+
+| Час першої появи | Вікно | Канали | Перший канал |
+|---|---:|---|---|
+| 2026-05-19T09:03:45+00:00 | 18.0 хв | `MoldovaPolitics;gagauznewsmd` | `gagauznewsmd` |
+| 2026-05-19T16:25:56+00:00 | 5.3 хв | `MoldovaPolitics;gagauznewsmd` | `gagauznewsmd` |
+| 2026-05-23T09:03:52+00:00 | 15.2 хв | `MoldovaPolitics;gagauznewsmd` | `gagauznewsmd` |
+| 2026-05-24T08:59:42+00:00 | 5.3 хв | `MoldovaPolitics;gagauznewsmd` | `gagauznewsmd` |
+
+Це не доводить координацію саме по собі, але є індикатором повторного використання однакового контенту у вузькому часовому вікні.
+
+### Патерн 6: повторювані наративи
+
+Для repeated text patterns додано обережне keyword-кодування narrative tags. Це не доказ наміру, а спосіб згрупувати повторювані теми:
+
+| Наративний тег | Кількість патернів | Приклад інтерпретації |
+|---|---:|---|
+| `gagauz_identity_history` | 3 | історична / мовна ідентичність Гагаузії |
+| `anti_sandu_governance` | 2 | критика Санду, корупції, "диктатури" |
+| `anti_west_eu` | 2 | критика ЄС / Європарламенту / західних інституцій |
+| `transnistria_russia_protection` | 1 | захист росіян у Придністров'ї |
+| `russian_language_identity` | 1 | російська мова як елемент ідентичності |
+| `russian_citizenship` | 1 | російське громадянство для жителів Придністров'я |
+
+Повний файл: `data/processed/narrative_summary.md`.
+
+## 7. Ролі каналів
+
+Ролі визначені у `data/processed/channel_roles.csv` евристично за `ENDORSES`-графом. `primary_source_candidate` означає "кандидат у джерело за incoming endorsements", а не доведене первинне авторство тексту.
+
+| Канал | Роль | Пояснення |
+|---|---|---|
+| `Republic_Of_GaGauZia` | `retransmitter;amplifier` | найбільший outgoing endorsement hub, weighted degree 3404 |
+| `Republic_Of_GaGauzia_MD` | `primary_source_candidate;amplifier` | найбільший incoming target, weight 3235 |
+| `MoldovaAdevarata` | `primary_source_candidate;amplifier` | strong incoming target, weight 87 |
+| `MoldovaPolitics` | `retransmitter;amplifier` | центр другого сегмента, outgoing endorsement hub |
+| `primulinmd` | `peripheral` | помітний target, але не hub у поточній моделі |
+
+Bridge-вузлів за betweenness не знайдено: `betweenesscentrality = 0` для всіх вузлів. Семантичний кандидат на міст — `gagauznewsmd`, бо саме він повторює частину тем між Gagauzia/Moldova-сегментами, але це не формальний betweenness bridge.
+
+## 8. Порівняння Gephi та Neo4j
+
+Neo4j використовувався як сховище GroupInt scrape, а Gephi — як інструмент візуалізації та метрик.
+
+| Пункт | Neo4j | Gephi |
+|---|---|---|
+| Повідомлення | 15100 `Message` nodes, 11781 з текстом | не імпортувались у фінальний граф |
+| Граф каналів | `Group -> Group` через `ENDORSES` | імпортований `Group -> Group ENDORSES` |
+| Вузли | 70 до очищення, 60 після conservative dedup | 70 у первинному Gephi export |
+| Ребра | 68 до очищення, 58 після conservative dedup | 68 у первинному Gephi export |
+| Метрики | Neo4j GDS окремо не запускався | degree, weighted degree, PageRank, betweenness, modularity |
+
+Обмеження: це не повне порівняння алгоритмів Neo4j GDS vs Gephi, бо Neo4j GDS-метрики не запускались і не збережені як artifact.
+
+## 9. Гіпотеза про координацію
+
+У мережі є ознаки можливого спільного контентного джерела або координації поширення: однакові тексти між `MoldovaPolitics` і `gagauznewsmd`, 4 валідні синхронні вікна в межах 5.3-18.0 хвилин, а також повторювані narrative tags навколо Гагаузії, Санду, Придністров'я, російської мови та російського громадянства.
+
+Це не доведення координації. Альтернативні пояснення:
+
+- канали можуть копіювати матеріали з одного відкритого джерела без прямої координації;
+- частина однакових текстів може бути repost/quote blocks;
+- GroupInt може не містити всіх metadata forwards/source;
+- часове вікно саме по собі є індикатором, а не доказом.
+
+Обережний висновок: у даних є ознаки **можливої координації або спільного джерела контенту**, але для доведення потрібні додаткові metadata forwards, адміністраторські зв'язки або більший часовий період.
+
+## 10. Висновки
 
 Мережа не є рівномірною. Вона має кілька центрів ретрансляції та багато периферійних вузлів. Найсильніший вузол - `Republic_Of_GaGauZia`, який формує найбільшу кількість і вагу endorsement-зв'язків.
 
@@ -162,7 +262,9 @@ MoldovaPolitics -> turan_express, weight 9, raw link @turan_express
 
 З точки зору інформаційної операції або пропагандистської екосистеми, граф показує не одну щільну мережу, а структуру з окремими центрами підсилення. Найважливіші вузли визначаються не лише кількістю повідомлень, а саме вагою повторюваних посилань на інші ресурси.
 
-## 8. Відтворення аналізу
+Текстовий pattern matching додатково показав, що частина однакових повідомлень повторюється між каналами. Найсильніша синхронність у цій вибірці — між `MoldovaPolitics` і `gagauznewsmd`.
+
+## 11. Відтворення аналізу
 
 1. Запустити GroupInt на VPS.
 2. Підключити Telegram session через OTP.
@@ -192,7 +294,15 @@ Network Diameter
 
 6. Зберегти `.gephi`, скріншоти графів і таблиці топ-вузлів/ребер.
 
-## 9. Gephi AI Analysis (MCP)
+Для текстового аналізу:
+
+```text
+python scripts/clean_graph_data.py
+python scripts/classify_channel_roles.py
+python scripts/analyze_text_patterns.py
+```
+
+## 12. Gephi AI Analysis (MCP)
 
 Додатковий аналіз виконано через Gephi MCP API v2.0.0 (`http://127.0.0.1:8080`) і плагін `gephi-ai` by Matt Artz.
 
@@ -232,7 +342,7 @@ message id: 71800
 
 Це аномально сильний endorsement-зв'язок. Його варто інтерпретувати обережно: вага може відображати багато повторень, агрегований результат парсингу GroupInt або особливість витягнення посилань з одного/кількох повідомлень.
 
-## 10. Обмеження
+## 13. Обмеження
 
 - Частина Telegram-об'єктів є каналами, тому список учасників і авторів не використовувався як основа графа.
 - Основна модель побудована на `ENDORSES`, тобто на `t.me` посиланнях і згадках.
