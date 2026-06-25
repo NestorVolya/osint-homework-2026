@@ -4,7 +4,47 @@
 osint-homework-2026/
 ├── README.md
 ├── STRUCTURE.md               ← цей файл
+├── SECURITY.md
 ├── .gitignore
+│
+├── КР-Nestor-V/               ← Курсова робота: автоматизований OSINT pipeline
+│   ├── README.md              ← showcase-navigator: 8 обов'язкових секцій + навігація
+│   ├── KR_PRODUCT_AUDIT.md   ← критика з 4 позицій + roadmap H0→H3
+│   ├── VALIDATION_REPORT_KR.md ← 4-actor validation: Чекаль + Braschi + Коваленко + Філоненко
+│   ├── DECISIONS.md           ← ADR-001 … ADR-007
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── pipeline/              ← 15 модулів: collect → report
+│   │   ├── run.py             ← entry point
+│   │   ├── collect.py         ← Exa + Tavily + Google CSE
+│   │   ├── account_discovery.py
+│   │   ├── account_graph.py   ← pyvis
+│   │   ├── enrich_timeline.py ← WAR_CONTEXT mapping
+│   │   ├── enrich_statements.py ← Gemini NER + steelman prompt
+│   │   ├── enrich_network.py  ← NER + risk flags
+│   │   ├── geoclusters.py
+│   │   ├── detect_contradictions.py
+│   │   ├── quality_check.py   ← 5-gate Corpus Health Score
+│   │   ├── report.py          ← HTML (Jinja2)
+│   │   ├── report_md.py       ← Markdown 7 секцій
+│   │   ├── dstu.py            ← ДСТУ 8302:2015 бібліографія
+│   │   ├── storage/           ← SQLite (7 таблиць) + ZIP archive
+│   │   └── gates/             ← input / budget / safety gates
+│   ├── benchmark_profiles/    ← YAML: ua_cultural_ru_sphere + braschi_catholic + default
+│   ├── config/
+│   │   └── settings.yaml
+│   ├── templates/
+│   │   └── report.html.j2
+│   ├── tests/                 ← pytest 15/15
+│   ├── scripts/
+│   │   └── export_to_osint_base.py ← ADR-007: bridge export
+│   ├── docs/
+│   │   ├── adr/               ← ADR-001 … ADR-007
+│   │   ├── COMPARATIVE_ANALYSIS.md ← аудит 5 реалізацій (Claude Code vs OpenAI Codex)
+│   │   ├── pipeline_diagram.png
+│   │   └── demoCHEKAL.gif     ← demo: скрол звіту gold actor
+│   └── examples/
+│       └── sample_run/        ← реальний прогін Чекаля: HTML + SQLite + граф
 │
 ├── ДЗ-02-Nestor-V/            ← Промптинг, RAG, захист від ін'єкцій
 │   ├── README.md
@@ -13,118 +53,89 @@ osint-homework-2026/
 │   ├── П1-RAG-порівняння.md   ← 4 варіанти RAG + порівняльна таблиця
 │   ├── П2-pipeline.md         ← Jina → NotebookLM → H-аналіз → MNT
 │   ├── П3-injection.md        ← до/після захисту (промпт-рівень)
-│   ├── П4-llm-guard.md        ← FastAPI + LLM Guard: захист RAG на рівні retrieval
-│   ├── notes-n8n-prompts.md   ← еволюція промптів, архітектура n8n
-│   ├── promt 1.png            ← ChatGPT без контексту (Prompt A)
-│   ├── promt 2.png            ← ChatGPT зі структурованим промптом (Prompt Б)
-│   ├── screenshot-p3-before.png  ← П3: без захисту — injection прийнятий
-│   ├── screenshot-p3-after.png   ← П3: з захистом — injection відхилений
-│   ├── Guarded LLM Retrieval-2026-04-23-000546.png  ← П4: LLM Guard flowchart
-│   ├── Guarded LLM Retrieval-2026-04-23-000721.png  ← П4: LLM Guard flowchart v2
-│   ├── pipline Shoykhet.png   ← П2: OSINT pipeline схема
-│   └── ...
+│   └── П4-llm-guard.md        ← FastAPI + LLM Guard: захист RAG на рівні retrieval
 │
-├── ДЗ-06-Nestor-V/            ← Теорія графів: патентний граф БЕК
-│   ├── README.md              ← опис, ключові знахідки, acceptance criteria
-│   ├── build_graph.py         ← xlsx → NetworkX → GEXF + CSV (Louvain, centrality)
-│   ├── requirements.txt       ← openpyxl, pandas (networkx вже встановлено)
-│   ├── theory_appendix.md     ← теорія: Louvain, Modularity Q, метрики графа
-│   ├── data/
-│   │   ├── patents_graph.gexf                    ← 7 869 вузлів, для Gephi
-│   │   ├── modularity-report.html                ← Gephi modularity HTML-звіт
+├── ДЗ-03/                     ← MindsDB + ArkhamMirror SHATTERED
+│   ├── README.md
+│   ├── ДЗ-03-Nestor-V/        ← Базовий: MindsDB SQL + AI агент
+│   │   ├── README.md
+│   │   ├── report.md
 │   │   └── screenshots/
-│   │       ├── gephi-graph-overview.png           ← загальний вигляд графа
-│   │       ├── gephi-modularity-report.png        ← Q=0.956, 702 communities
-│   │       ├── gephi-colored-clusters.png         ← кластери за кольором
-│   │       ├── gephi-force-atlas2.png             ← Force Atlas 2 layout
-│   │       ├── gephi-data-laboratory.png          ← таблиця вузлів з Modularity Class
-│   │       └── communities-size-distribution.png  ← розподіл розмірів кластерів
-│   └── homework_cluster_summaries/
-│       ├── nodes_with_communities.csv ← 7 869 вузлів + Community_Python + Modularity_Class_Gephi
-│       ├── cluster_summaries.md       ← 5 кластерів + науковий персонал + LLM hallucination risks
-│       ├── prompt.md                  ← системний промпт для Claude Sonnet 4.6
-│       └── reviewer_notes.md          ← ручна перевірка AI-описів + збагачення Google Patents
+│   └── dz-mindsdb-arkham-Nestor-V/ ← Просунутий: ArkhamMirror (28 shards)
+│       ├── README.md
+│       ├── arkham/
+│       │   ├── docker-compose.yml
+│       │   └── .env.example
+│       └── screenshots/
 │
-├── ДЗ-11-Nestor-V/            ← OSINT: Doppelganger (Italian campaign 2022–2024)
+├── ДЗ-04-Nestor-V/            ← Mini-pipeline: risu.ua (Crawl4AI + Docker + Prometheus)
 │   ├── README.md
-│   ├── mini_osint_report_doppelganger_italy.md  ← основний звіт: опис, 5 кейсів, методи, наративи
-│   ├── mini_osint_report_doppelganger_italy.html ← HTML з нумерованими виносками-посиланнями
-│   ├── sources.md                                ← таблиця 16 джерел зі статусом перевірки
-│   ├── sources.html                              ← HTML-версія (клікабельні лінки)
-│   └── screenshots/                              ← 16 скріншотів першоджерел
-│
-├── ДЗ-12-Nestor-V/            ← Кластеризація Telegram-каналів: GroupInt + Neo4j + Gephi
-│   ├── README.md
-│   ├── AI_OSINT_HW_Clustering_PatternMatching_Nestor-V.md  ← основний OSINT-звіт
-│   ├── PLAN.md                                            ← план виконання
-│   ├── SCREENSHOTS.md                                     ← перелік скріншотів
-│   ├── VPS_RUNTIME_STATUS.md                              ← VPS/Traefik/GroupInt runtime notes
-│   ├── data/
-│   │   ├── nodes_with_communities.csv                     ← вузли, clusters, centrality metrics
-│   │   ├── edges_endorsements.csv                         ← ребра ENDORSES з weight/raw links/message ids
-│   │   └── gephi_ai_summary.md                            ← підсумок Gephi MCP аналізу
-│   ├── scripts/
-│   │   └── gephi_mcp_run.py                               ← відтворення Gephi AI/MCP аналізу
+│   ├── compose.yaml           ← 5 сервісів: scraper + scheduler + Prometheus + Grafana
+│   ├── Dockerfile             ← Python 3.11 + Playwright/Chromium
+│   ├── src/                   ← scraper, normalizer, scheduler
+│   ├── config/
+│   │   └── prometheus.yml
+│   ├── data/                  ← raw + normalized JSON
+│   ├── docs/
 │   └── screenshots/
-│       ├── 01-hostinger-docker-manager-projects.png
-│       ├── 03-hostinger-docker-manager-groupint-compose-setup.png
-│       ├── 04-groupint-telegram-session-saved-sensitive.png
-│       ├── 05-groupint-target-republic-of-gagauzia-selected.png
-│       ├── 08-groupint-republic-endorsements-663-dark.png
-│       ├── 10-gephi-neo4j-import-group-endorsements.png
-│       ├── 13-gephi-expanded-modularity-70nodes.png
-│       ├── 15-gephi-data-lab-top-weighted-degree.png
-│       ├── 16-gephi-data-lab-top-endorsement-edges.png
-│       ├── 17-gephi-ai-analysis-export.png
-│       └── telegram-endorsements-expanded-gephi-ai.gephi
 │
-├── ДЗ-17-Nestor-V/            ← Статистика в OSINT: виявлення ботів (🔵+🔴)
+├── ДЗ-05-Nestor-V/            ← Entity Resolution та граф зв'язків (Чекаль)
 │   ├── README.md
-│   ├── DZ17_Bot_Detection_Nestor-V.ipynb   ← основний ноутбук: генерація, аналіз, моделі, висновки
-│   ├── AI_OSINT_HW_Statistics_Nestor-V.md  ← наративний звіт простими словами + OSINT-контекст + КР
-│   ├── data/
-│   │   └── accounts.csv                    ← 500 акаунтів: 350 людей / 150 ботів, 5 ознак + мітка
-│   ├── screenshots/
-│   │   ├── histogram_posts_per_day.png
-│   │   ├── boxplot_followers.png
-│   │   ├── scatter_plot.png
-│   │   ├── correlation_heatmap.png
-│   │   └── feature_importance.png
-│   └── source/                             ← матеріали заняття (лекція, туторіал, requirements)
+│   ├── Б1-ідентифікатори.md   ← ідентифікатори актора
+│   ├── Б2-граф-spec.md        ← специфікація графа зв'язків
+│   ├── Б3-collision.md        ← collision detection: однофамільці
+│   ├── П4-flowsint.md         ← Flowsint entity resolution
+│   ├── П5-порівняння.md       ← порівняння методів
+│   └── graphs/                ← pyvis HTML-графи
 │
-└── ДЗ-03/                     ← MindsDB + ArkhamMirror SHATTERED
-    ├── README.md              ← спільний огляд обох рівнів
-    │
-    ├── ДЗ-03-Nestor-V/        ← Базовий рівень: MindsDB
-    │   ├── README.md
-    │   ├── report.md          ← SQL-запити + діалог AI агента (Gemini 2.5 Flash)
-    │   └── screenshots/
-    │       ├── screenshot-01-docker.png       ← docker ps, контейнери Running
-    │       ├── screenshot-02-studio.png       ← MindsDB Studio UI
-    │       ├── screenshot-03-show-tables.png  ← SHOW TABLES / SELECT перших рядків
-    │       ├── screenshot-04-query1.png       ← SQL Query 1: агрегація по країні
-    │       ├── screenshot-05-query2.png       ← SQL Query 2: RU-джерела з вагою
-    │       ├── screenshot-06-query3.png       ← SQL Query 3: фільтр
-    │       └── screenshot-07-agent.png        ← AI агент chekal_analyst відповідає
-    │
-    └── dz-mindsdb-arkham-Nestor-V/   ← Просунутий рівень: ArkhamMirror
-        ├── README.md                 ← результати, скріншоти, обмеження
-        ├── arkham-overview.md        ← що таке ArkhamMirror (архітектура платформи)
-        ├── report.md
-        ├── docker-compose.osint.yml
-        ├── arkham/
-        │   ├── docker-compose.yml   ← запуск: shattered-app + shattered-postgres
-        │   └── .env.example         ← шаблон змінних (без паролів)
-        ├── screenshot-arkham_health.png      ← health check: 25 shards, status healthy
-        ├── screenshot-arkham_dashboard.png   ← реальний UI Dashboard (всі сервіси Online)
-        ├── screenshot-arkham_documents.png   ← реальний UI Documents: 5 файлів processed
-        ├── screenshot-arkham_documents_real.png
-        ├── screenshot-arkham_mindsdb.png     ← MindsDB SELECT з arkham_db (5 рядків)
-        └── screenshots/
-            ├── 01-docker-containers-running.png
-            ├── 02-mindsdb-studio-editor.png
-            ├── 03-docker-desktop-stats.png
-            └── 04-gordon-setup-complete.png
+├── ДЗ-06-Nestor-V/            ← Теорія графів: патентний граф БЕК (Gephi + Louvain)
+│   ├── README.md
+│   ├── build_graph.py         ← xlsx → NetworkX → GEXF + CSV
+│   ├── theory_appendix.md     ← Louvain, Modularity Q, метрики
+│   ├── data/
+│   │   ├── patents_graph.gexf ← 7 869 вузлів
+│   │   └── modularity-report.html
+│   └── homework_cluster_summaries/
+│       ├── nodes_with_communities.csv
+│       ├── cluster_summaries.md
+│       └── prompt.md
+│
+├── ДЗ-11-Nestor-V/            ← OSINT: Doppelganger Italy (2022–2024)
+│   ├── README.md
+│   ├── mini_osint_report_doppelganger_italy.md
+│   ├── mini_osint_report_doppelganger_italy.html ← HTML з ДСТУ виносками
+│   ├── sources.md
+│   ├── sources.html
+│   └── screenshots/           ← 16 скріншотів першоджерел
+│
+├── ДЗ-12-Nestor-V/            ← Telegram-кластеризація: GroupInt + Neo4j + Gephi
+│   ├── README.md
+│   ├── AI_OSINT_HW_Clustering_PatternMatching_Nestor-V.md
+│   ├── data/
+│   │   ├── nodes_with_communities.csv
+│   │   └── edges_endorsements.csv
+│   ├── scripts/
+│   │   └── gephi_mcp_run.py
+│   └── screenshots/
+│
+├── ДЗ-17-Nestor-V/            ← Статистика: виявлення ботів (LogReg + KMeans)
+│   ├── README.md
+│   ├── DZ17_Bot_Detection_Nestor-V.ipynb
+│   ├── AI_OSINT_HW_Statistics_Nestor-V.md
+│   ├── data/
+│   │   └── accounts.csv       ← 500 акаунтів: 350 людей / 150 ботів
+│   └── screenshots/
+│
+└── ДЗ-20-Nestor-V/            ← Верифікація за Берклійським протоколом (Буча, Maxar)
+    ├── README.md
+    ├── narrative-report.md
+    ├── verification-report.md
+    ├── verification-report.html
+    ├── sources.md
+    ├── submission_comment.md
+    ├── geolocation/
+    ├── chronolocation/
+    └── source-material/
 ```
 
 ---
@@ -144,7 +155,6 @@ osint-homework-2026/
 
 - [bullet 1]
 - [bullet 2]
-- ...
 
 **Де:** Local (Windows 10) [/ VPS] — [інструменти]
 
