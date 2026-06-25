@@ -1,7 +1,7 @@
 # OSINT Homework 2026 — Nestor V
 
 Монорепозиторій курсу «AI для OSINT і розвідки» · Robot Dreams · 2026  
-**Студент:** Олександр Корнієнко · псевдо Nestor-V  
+**Студент:** Nestor-V  
 **Інструменти:** Claude Code · OpenAI Codex · Gemini · Python · Docker · Gephi
 
 ---
