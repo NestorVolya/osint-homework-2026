@@ -11,6 +11,17 @@
 
 ---
 
+## Опис
+
+Автоматизований OSINT pipeline для профілювання публічних акторів за відкритими джерелами.  
+**Вхід:** ПІБ, нікнейм або email. **Вихід:** HTML-досьє + JSON-артефакти + SQLite + ZIP Evidence preservation.
+
+Pipeline автоматично збирає веб-згадки (Exa + Tavily + Google CSE), знаходить акаунти в соціальних мережах (URL mining + Sherlock-like probing + HIBP для email), будує таймлайн активності в контексті подій в Україні, аналізує висловлювання через Gemini LLM, виявляє мережу зв'язків через NER та генерує HTML-звіт з оцінкою якості корпусу джерел (Corpus Health Score).
+
+**Час прогону:** ~15–25 хв. **Стек:** Python 3.11 · Exa · Tavily · Gemini 2.0-flash · spaCy · pyvis · Docker.
+
+---
+
 ## Навігація
 
 | 📄 | Що всередині |
@@ -21,6 +32,16 @@
 | [docs/adr/](docs/adr/) | 7 архітектурних рішень (ADR-001 … ADR-007) |
 | [docs/COMPARATIVE_ANALYSIS.md](docs/COMPARATIVE_ANALYSIS.md) | Чому обрана ця реалізація: незалежний аудит 5 версій |
 | [../README.md](../README.md) | Вся монорепа: ДЗ-02 … ДЗ-20 + КР |
+
+---
+
+## Напрям та задача
+
+**Напрям 1 — «Персони та соціальні мережі/геолокація»**
+
+Автоматизувати верифікацію публічної особи за фрагментарними вхідними даними (нікнейм / email / ПІБ). Цільова аудиторія: журналіст або правозахисна організація, що формує доказову базу.
+
+Детальніше — у блоці нижче.
 
 ---
 
@@ -230,7 +251,42 @@ docker run --env-file .env -v "$(pwd)/output:/app/output" actor-osint \
 
 ---
 
-## Вихідні артефакти
+## Приклад вхідних даних
+
+Мінімальний вхід — ПІБ:
+
+```bash
+python -m pipeline.run --seed "Олексій Чекаль" --seed_type fullname
+```
+
+Варіанти за типом seed:
+
+| seed_type | Приклад | Що активується |
+|---|---|---|
+| `fullname` | `"Олексій Чекаль"` | Повний pipeline: веб + акаунти + email lookups |
+| `nickname` | `"chekal_art"` | Username probing (Sherlock) + соц. мережі |
+| `email` | `"user@domain.com"` | HIBP breach check + email-based пошук |
+| `auto` | `"Чекаль"` | Автовизначення типу за форматом |
+
+З профілем (для складних акторів — same-name disambiguation):
+
+```bash
+python -m pipeline.run \
+  --seed "Francesco Braschi" \
+  --seed_type fullname \
+  --profile benchmark_profiles/braschi_catholic.yaml
+```
+
+З додатковою мовною підказкою:
+
+```bash
+python -m pipeline.run --seed "Олексій Чекаль" --seed_type fullname \
+  --language_hint uk en --config config/settings.yaml
+```
+
+---
+
+## Приклад вихідного звіту
 
 ```
 output/2026-06-06_23-31-12/          ← gold actor run
@@ -264,6 +320,21 @@ output/2026-06-06_23-31-12/          ← gold actor run
 | HTTP probing | Sherlock-like: 10 платформ за username | — |
 
 Fallback: Gemini rate-limit → spaCy `uk_core_news_sm`
+
+---
+
+## Відомі обмеження
+
+| Обмеження | Деталь | ADR / план |
+|---|---|---|
+| **RU-медіа Class B = 0% recall** | pravmir.ru, artos.org, radiovera.ru — Exa/Tavily не індексують. Прогалина критична для акторів з РФ-зв'язками | ADR-006; вирішення → H2 (Brave Search API) |
+| **Sherlock false positives** | Username probing знаходить акаунти за збігом імені, не ідентичністю. Результати позначені `[Sherlock]` — потребують верифікації аналітиком | H2: 2-signal confirmation rule |
+| **Same-name disambiguation** | Для поширених ПІБ (Коваленко, Філоненко) пайплайн може захопити не того актора. Вирішення: `--profile` з полем `query_context` | VALIDATION_REPORT_KR.md §Braschi |
+| **HIBP потребує платного ключа** | Без `HIBP_API_KEY` крок email breach тихо пропускається. Ключ: $3.50/міс | H0: рекомендовано отримати |
+| **Gemini rate-limit → rhetoric = 0** | При виснаженні ліміту `rhetoric_risk_ratio = 0` (NER fallback spaCy не класифікує риторику). Не є помилкою — задокументована деградація | — |
+| **Telegram — мінімальне покриття** | t.me/s/ дає публічні канали, але не пошук згадок людини в меседжах | H2: tgstat/lyzem mentions API |
+| **Corpus Health = 1.00 ≠ "правда"** | Метрика структури корпусу джерел, не достовірності їхнього контенту. Фінальний judgment — за аналітиком | Роз'яснено в report_quality.md §1 |
+| **Reverse image geosearch** | Не реалізовано (поза scope Напряму 1) | Post-KR |
 
 ---
 
