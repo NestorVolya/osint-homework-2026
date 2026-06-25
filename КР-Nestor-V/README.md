@@ -20,6 +20,8 @@ Pipeline автоматично збирає веб-згадки (Exa + Tavily +
 
 **Час прогону:** ~15–25 хв. **Стек:** Python 3.11 · Exa · Tavily · Gemini 2.0-flash · spaCy · pyvis · Docker.
 
+![Pipeline diagram](docs/pipeline_diagram.png)
+
 ---
 
 ## Навігація
