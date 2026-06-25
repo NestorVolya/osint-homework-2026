@@ -1,0 +1,12 @@
+.env
+.venv/
+output/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.git/
+.gitignore
+*.md
+tests/
+examples/

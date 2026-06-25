@@ -1,0 +1,21 @@
+﻿SHA-256: 6EBCA4203EB16540933FE44CBFBE02FA2BD741B6014E148F9CD1341CC31EE3D0
+File: maxar-yablunska-20220319.webp
+
+Original URL (primary publication):
+  https://www.euronews.com/2022/04/06/uk-ukraine-crisis-bucha-images
+  (AP wire "Satellite images show civilian deaths in Ukraine town while it was
+   in Russian hands–Maxar", published 4 April 2022 via AP / 6 April via Reuters)
+
+Download URL (source of this copy):
+  https://aerospaceamerica.aiaa.org/wp-content/uploads/2022/04/Bucha-Maxar.webp
+  (AIAA Aerospace America, April 2022 — publicly accessible copy)
+
+Accessed: 2026-06-07
+
+NOTE: This is the SHA-256 of a publicly available web copy of the Maxar satellite imagery,
+republished by AIAA Aerospace America as part of their April 2022 report on Maxar's
+role in the Bucha revelations. The original Maxar high-resolution file is not publicly
+downloadable without a commercial license. The hash documents this specific copy
+for chain-of-custody purposes.
+
+Original Maxar imagery: (c) 2022 Maxar Technologies. Published via AP April 4, 2022.

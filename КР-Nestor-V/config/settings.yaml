@@ -1,0 +1,14 @@
+max_requests_per_run:
+  exa: 20
+  tavily: 10
+  apify: 5
+  gemini: 60
+  youtube: 5
+
+max_runtime_seconds: 900
+
+enable_service_exa: true
+enable_service_tavily: true
+enable_service_apify: false
+enable_service_youtube: false
+enable_service_gemini: true

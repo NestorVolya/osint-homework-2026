@@ -1,0 +1,2414 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title>OSINT Report — Олексій Чекаль</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 1.5rem 2rem; color: #1a1a1a; background: #f0f2f5; }
+    h1 { color: #b91c1c; margin: 0 0 0.2rem; font-size: 1.6rem; }
+    h2 { border-bottom: 2px solid #e5e7eb; padding-bottom: 4px; margin: 2rem 0 0.5rem; font-size: 1.1rem; }
+    table { border-collapse: collapse; width: 100%; margin-top: 0.5rem; font-size: 0.86rem; background: #fff; border-radius: 6px; overflow: hidden; }
+    th { background: #f3f4f6; text-align: left; padding: 7px 10px; border: 1px solid #d1d5db; font-size: 0.8rem; white-space: nowrap; }
+    td { padding: 5px 10px; border: 1px solid #e5e7eb; vertical-align: top; }
+    tr:nth-child(even) { background: #f9fafb; }
+    a { color: #2563eb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .war-ctx { color: #6b7280; font-size: 0.78rem; }
+    .flag-risk { color: #dc2626; font-weight: 600; }
+    .empty { color: #9ca3af; font-style: italic; padding: 0.5rem 0; }
+    code { font-size: 0.82rem; background: #f3f4f6; padding: 1px 5px; border-radius: 3px; }
+
+    /* ── Summary card ── */
+    .summary-card {
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+      padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    }
+    .stats-row { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #f3f4f6; }
+    .stat { text-align: center; min-width: 70px; }
+    .stat-num { font-size: 2rem; font-weight: 700; line-height: 1; color: #111; }
+    .stat-lbl { font-size: 0.72rem; color: #6b7280; margin-top: 3px; text-transform: uppercase; letter-spacing: .03em; }
+    .section-label { font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 0.4rem; }
+    .rhetoric-row { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .rcount { padding: 3px 10px; border-radius: 12px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; }
+    .rcount:hover { opacity: 0.8; }
+    .risk-block { margin-bottom: 1rem; }
+    .risk-list { margin: 0.3rem 0 0; padding: 0 0 0 1.2rem; font-size: 0.84rem; line-height: 1.7; }
+    .export-row { display: flex; gap: 0.5rem; flex-wrap: wrap; padding-top: 0.75rem; border-top: 1px solid #f3f4f6; }
+    .btn {
+      padding: 5px 13px; border: 1px solid #d1d5db; border-radius: 5px;
+      cursor: pointer; font-size: 0.82rem; background: #fff; color: #374151;
+    }
+    .btn:hover { background: #f3f4f6; border-color: #9ca3af; }
+    .btn-primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+    .btn-primary:hover { background: #1e40af; }
+
+    /* ── Rhetoric type badges ── */
+    .rt-pro-ukrainian   { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+    .rt-pro-russian     { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+    .rt-bridge-building { background: #fef9c3; color: #854d0e; padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+    .rt-ambiguous       { background: #fde8d0; color: #9a3412; padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+    .rt-neutral         { background: #f3f4f6; color: #374151; padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+    .rt-unknown         { background: #f3f4f6; color: #9ca3af; padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+
+    /* ── Filter bar ── */
+    .filter-bar { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; margin-bottom: 0.75rem; }
+    .filter-bar .flbl { font-size: 0.78rem; color: #6b7280; margin-right: 0.15rem; }
+    .fbtn {
+      padding: 3px 11px; border: 1.5px solid #d1d5db; border-radius: 12px;
+      cursor: pointer; font-size: 0.78rem; background: #fff; color: #374151;
+      transition: all .12s;
+    }
+    .fbtn:hover { border-color: #9ca3af; background: #f3f4f6; }
+    .fbtn.active { font-weight: 700; }
+    .fbtn-all.active          { border-color: #374151; background: #374151; color: #fff; }
+    .fbtn-pro-ukrainian.active  { border-color: #16a34a; background: #dcfce7; color: #166534; }
+    .fbtn-pro-russian.active    { border-color: #dc2626; background: #fee2e2; color: #991b1b; }
+    .fbtn-bridge-building.active { border-color: #d97706; background: #fef9c3; color: #854d0e; }
+    .fbtn-ambiguous.active      { border-color: #ea580c; background: #fde8d0; color: #9a3412; }
+    .fbtn-neutral.active        { border-color: #6b7280; background: #f3f4f6; color: #374151; }
+    .fbtn-unknown.active        { border-color: #d1d5db; background: #f9fafb; color: #9ca3af; }
+
+    .hidden { display: none !important; }
+    #stmts-counter { font-size: 0.78rem; color: #6b7280; margin-left: 0.5rem; }
+
+    /* ── Corpus Health ── */
+    #corpus-health { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1.1rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+    #corpus-health h2 { border: none; margin: 0 0 0.75rem; padding: 0; font-size: 1rem; }
+    .badge-strong { color: #16a34a; font-weight: 700; font-size: 0.82rem; background: #dcfce7; padding: 2px 8px; border-radius: 10px; margin-left: 0.5rem; }
+    .badge-medium { color: #b45309; font-weight: 700; font-size: 0.82rem; background: #fef3c7; padding: 2px 8px; border-radius: 10px; margin-left: 0.5rem; }
+    .badge-weak   { color: #b91c1c; font-weight: 700; font-size: 0.82rem; background: #fee2e2; padding: 2px 8px; border-radius: 10px; margin-left: 0.5rem; }
+    .gates-table { font-size: 0.82rem; }
+    .gates-table th { font-size: 0.78rem; }
+    tr.gate-pass td:first-child::before { content: '✅ '; }
+    tr.gate-warn td { background: #fefce8; }
+    tr.gate-fail td { background: #fff1f2; }
+    .diagnostics { color: #6b7280; font-size: 0.82rem; font-style: italic; margin: 0.5rem 0 0; }
+
+    /* Contradictions */
+    .cont-high   { border-left:3px solid #dc2626; background:#fff1f2; padding:.45rem .75rem; margin:.35rem 0; border-radius:4px; font-size:.86rem; }
+    .cont-medium { border-left:3px solid #d97706; background:#fffbeb; padding:.45rem .75rem; margin:.35rem 0; border-radius:4px; font-size:.86rem; }
+    .cont-low    { border-left:3px solid #6b7280; background:#f9fafb; padding:.45rem .75rem; margin:.35rem 0; border-radius:4px; font-size:.86rem; }
+    /* Confidence badges */
+    .conf-gemini { font-size:.72rem; background:#dbeafe; color:#1d4ed8; padding:1px 6px; border-radius:8px; white-space:nowrap; }
+    .conf-regex  { font-size:.72rem; background:#f3f4f6; color:#6b7280; padding:1px 6px; border-radius:8px; white-space:nowrap; }
+    /* Evidence quote */
+    .evidence-q  { font-size:.78rem; color:#6b7280; font-style:italic; }
+  </style>
+</head>
+<body>
+
+<h1>OSINT Actor Report</h1>
+<p style="color:#6b7280;font-size:0.88rem;margin:0 0 1.2rem">
+  <strong>Олексій Чекаль</strong> &nbsp;·&nbsp; Actor ID: <code>2c5a0fd1</code>
+</p>
+
+<!-- ═══ SUMMARY BLOCK ═══ -->
+<div class="summary-card">
+
+  <div class="stats-row">
+    <div class="stat"><div class="stat-num">44</div><div class="stat-lbl">Джерела</div></div>
+    <div class="stat"><div class="stat-num">21</div><div class="stat-lbl">Події</div></div>
+    <div class="stat"><div class="stat-num">65</div><div class="stat-lbl">Цитати</div></div>
+    <div class="stat"><div class="stat-num">50</div><div class="stat-lbl">Звʼязки</div></div>
+    <div class="stat"><div class="stat-num">7</div><div class="stat-lbl">Акаунти</div></div>
+  </div>
+
+  
+  <div>
+    <div class="section-label">Риторичні позиції</div>
+    <div class="rhetoric-row">
+      
+      <span class="rcount rt-unknown" title="Фільтрувати" onclick="filterStmts('unknown', null)">unknown: 65</span>
+      
+    </div>
+  </div>
+  
+
+  
+  <div style="margin-bottom:0.9rem">
+    <div class="section-label">Типи джерел</div>
+    <div style="font-size:0.82rem;color:#374151">
+      
+      <span style="margin-right:0.8rem">project: <strong>4</strong></span>
+      
+      <span style="margin-right:0.8rem">bio: <strong>16</strong></span>
+      
+      <span style="margin-right:0.8rem">interview: <strong>6</strong></span>
+      
+      <span style="margin-right:0.8rem">other: <strong>14</strong></span>
+      
+      <span style="margin-right:0.8rem">social: <strong>1</strong></span>
+      
+      <span style="margin-right:0.8rem">news: <strong>3</strong></span>
+      
+    </div>
+  </div>
+  
+
+  
+  <div class="risk-block">
+    <div class="section-label">⚠️ Ризик-зв'язки</div>
+    <ul class="risk-list">
+      
+      <li>
+        <span class="flag-risk">russian world, russian orthodox church</span>
+        — Research Institute
+        <span style="color:#6b7280">(організаційний, 2024-06-29T13:20:00.000Z)</span>
+      </li>
+      
+      <li>
+        <span class="flag-risk">russian world, russian orthodox church</span>
+        — Sheptytsky Center
+        <span style="color:#6b7280">(організаційний, 2024-06-29T13:20:00.000Z)</span>
+      </li>
+      
+      <li>
+        <span class="flag-risk">russian world, russian orthodox church</span>
+        — Charitable Foundation
+        <span style="color:#6b7280">(організаційний, 2024-06-29T13:20:00.000Z)</span>
+      </li>
+      
+      <li>
+        <span class="flag-risk">russian world, russian orthodox church</span>
+        — Aesthetics of Graphic Resistance and Typeface
+        <span style="color:#6b7280">(організаційний, 2024-06-29T13:20:00.000Z)</span>
+      </li>
+      
+      <li>
+        <span class="flag-risk">russian world, russian orthodox church</span>
+        — Orthodox Church of Ukraine
+        <span style="color:#6b7280">(організаційний, 2024-06-29T13:20:00.000Z)</span>
+      </li>
+      
+      <li>
+        <span class="flag-risk">russian world, russian orthodox church</span>
+        — Ukrainian Roman Catholics
+        <span style="color:#6b7280">(організаційний, 2024-06-29T13:20:00.000Z)</span>
+      </li>
+      
+      <li>
+        <span class="flag-risk">russian world, russian orthodox church</span>
+        — Greek Catholics
+        <span style="color:#6b7280">(організаційний, 2024-06-29T13:20:00.000Z)</span>
+      </li>
+      
+      <li>
+        <span class="flag-risk">russian world, russian orthodox church</span>
+        — Andriy Poturaylo
+        <span style="color:#6b7280">(особистий, 2024-06-29T13:20:00.000Z)</span>
+      </li>
+      
+    </ul>
+  </div>
+  
+
+  <div class="export-row">
+    <button class="btn" onclick="exportCSV('statements')" title="Цитати: date, rhetoric_type, platform, quote, summary">↓ Цитати CSV</button>
+    <button class="btn" onclick="exportCSV('sources')" title="Джерела: source_type, title, url, date_raw">↓ Джерела CSV</button>
+    <button class="btn btn-primary" onclick="exportJSON()">↓ Full JSON</button>
+  </div>
+
+</div>
+<!-- ═══ END SUMMARY ═══ -->
+
+
+<!-- ═══ CORPUS HEALTH ═══ -->
+
+<div id="corpus-health">
+  <h2>Corpus Health — 100%
+    <span class="badge-strong">strong</span>
+  </h2>
+  
+  <table class="gates-table">
+    <thead>
+      <tr><th>Gate</th><th>Статус</th><th>Тригери</th></tr>
+    </thead>
+    <tbody>
+      
+      <tr class="gate-pass">
+        <td>coverage_diversity</td>
+        <td>PASS</td>
+        <td style="color:#6b7280;font-size:0.8rem">—</td>
+      </tr>
+      
+      <tr class="gate-pass">
+        <td>depth_noise</td>
+        <td>PASS</td>
+        <td style="color:#6b7280;font-size:0.8rem">—</td>
+      </tr>
+      
+      <tr class="gate-pass">
+        <td>archive_temporal</td>
+        <td>PASS</td>
+        <td style="color:#6b7280;font-size:0.8rem">—</td>
+      </tr>
+      
+      <tr class="gate-pass">
+        <td>risk_signal</td>
+        <td>PASS</td>
+        <td style="color:#6b7280;font-size:0.8rem">—</td>
+      </tr>
+      
+      <tr class="gate-pass">
+        <td>technical</td>
+        <td>PASS</td>
+        <td style="color:#6b7280;font-size:0.8rem">—</td>
+      </tr>
+      
+    </tbody>
+  </table>
+  
+  <details style="margin-top:0.75rem">
+    <summary style="cursor:pointer;font-size:0.8rem;color:#6b7280;user-select:none">▸ Пояснення критеріїв</summary>
+    <div style="margin-top:0.5rem;font-size:0.78rem;color:#374151;line-height:1.6">
+      <table style="width:100%;border-collapse:collapse;font-size:0.78rem">
+        <thead><tr style="background:#f9fafb"><th style="text-align:left;padding:3px 8px">Gate</th><th style="text-align:left;padding:3px 8px">Що перевіряє</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:3px 8px;white-space:nowrap">Coverage &amp; Diversity</td><td style="padding:3px 8px">≥35% унікальних доменів, mix типів джерел</td></tr>
+          <tr style="background:#f9fafb"><td style="padding:3px 8px;white-space:nowrap">Depth &amp; Noise</td><td style="padding:3px 8px">Shallow ≤10%, медіанний текст ≥300 символів</td></tr>
+          <tr><td style="padding:3px 8px;white-space:nowrap">Archive &amp; Temporal</td><td style="padding:3px 8px">Archive ratio ≤50%, date coverage ≥20%</td></tr>
+          <tr style="background:#f9fafb"><td style="padding:3px 8px;white-space:nowrap">Risk Signal</td><td style="padding:3px 8px">RU-домени ≤60%, rhetoric risk ≤35%</td></tr>
+          <tr><td style="padding:3px 8px;white-space:nowrap">Technical</td><td style="padding:3px 8px">Дублікати ≤15%</td></tr>
+        </tbody>
+      </table>
+      <p style="margin:.5rem 0 0;color:#9ca3af;font-size:0.75rem">
+        PASS = норма &nbsp;·&nbsp; WARN = увага &nbsp;·&nbsp; FAIL = проблема.<br>
+        Пороги задаються у профілі <code>benchmark_profiles/*.yaml</code>.
+        rhetoric_risk потребує Gemini NER (при rate-limit = 0).
+      </p>
+    </div>
+  </details>
+  
+  <div style="font-size:0.8rem;color:#6b7280;margin-top:0.5rem">
+    Sources: <strong>44</strong> &nbsp;·&nbsp;
+    Domains: <strong>34</strong> &nbsp;·&nbsp;
+    Median text: <strong>2824</strong> chars &nbsp;·&nbsp;
+    Shallow: <strong>2.3%</strong>
+  </div>
+  
+  
+  <p class="diagnostics">Корпус відповідає базовим структурним вимогам.</p>
+  
+  
+  <div style="margin-top:.5rem;font-size:.8rem;color:#b45309">
+    ⏱ Часові прогалини:
+    <span style="margin-right:.75rem">2011–2013 (24 міс.)</span><span style="margin-right:.75rem">2013–2018 (68 міс.)</span><span style="margin-right:.75rem">2018–2020 (17 міс.)</span><span style="margin-right:.75rem">2020–2021 (17 міс.)</span>
+  </div>
+  
+</div>
+
+<!-- ═══ END CORPUS HEALTH ═══ -->
+
+
+<!-- 1. Statements -->
+<h2>Висловлювання</h2>
+
+<div class="filter-bar">
+  <span class="flbl">Фільтр:</span>
+  <button class="fbtn fbtn-all active" onclick="filterStmts('all', this)">Всі (65)</button>
+  
+  <button class="fbtn fbtn-unknown" onclick="filterStmts('unknown', this)">unknown (65)</button>
+  
+  <span id="stmts-counter"></span>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width:90px">Дата</th>
+      <th>Цитата</th>
+      <th style="width:220px">Резюме</th>
+      <th style="width:90px">Платформа</th>
+      <th style="width:120px">War context</th>
+      <th style="width:130px">Позиція</th>
+      <th style="width:72px">Метод</th>
+    </tr>
+  </thead>
+  <tbody id="stmts-tbody">
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2011-01-19</td>
+      <td>«The Demonstration on the Faith»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2013-01-22</td>
+      <td>«Свет во тьме светит. Свидетельство Русской Православной Церкви в годы советских гонений»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>other</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2013-01-22</td>
+      <td>«Иконография Евангелистов в Софии Киевской и каллиграфическая культура Византии»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>other</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2013-01-22</td>
+      <td>«По плодам их узнаете их. Собирают ли с терновника виноград, или с репейника смоквы?»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>other</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2018-09-30</td>
+      <td>«Современный человек устал от компьютерной эстетики»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>news</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2018-09-30</td>
+      <td>«Світ ловив мене, та не впіймав»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>news</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2018-09-30</td>
+      <td>«Каллиграфия помогает думать»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>news</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2020-02-23</td>
+      <td>«Високий друк та ілюстрація»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>radio</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2020-02-23</td>
+      <td>«Під час цієї роботи я намагався зробити книгу-сад – такий собі «садок вишневий коло хати»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>radio</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2020-02-23</td>
+      <td>«Українське народне мистецтво»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>radio</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2021-09-13</td>
+      <td>«Світ ловив мене, та не спіймав»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>interview</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2021-09-13</td>
+      <td>«Я дуже люблю ось цей стілець, але на ньому ж неможливо сидіти»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>interview</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2021-09-13</td>
+      <td>«Господь симпатизує аутсайдерам»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>interview</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2022-05-26</td>
+      <td>«Lesson #1: Russia lied, Russia lies, Russia will lie»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>media</td>
+      <td class="war-ctx">відступ з Київщини / Маріуполь</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2022-05-26</td>
+      <td>«Світ ловив мене, та не впіймав»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>media</td>
+      <td class="war-ctx">відступ з Київщини / Маріуполь</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2022-05-26</td>
+      <td>«Всі звуться православними, однак між нами велика прірва»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>media</td>
+      <td class="war-ctx">відступ з Київщини / Маріуполь</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2022-06-27</td>
+      <td>«The only request to people of different countries is to take interest in the history and culture of Ukraine. It will enrich your horizons and help us in our struggle and in the creation and restoration of the country after the victory and destruction.»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>other</td>
+      <td class="war-ctx">Донбаська кампанія</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2022-08-28</td>
+      <td>«The world tried to catch me but didn&#39;t succeed.»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>interview</td>
+      <td class="war-ctx">Донбаська кампанія</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2022-08-28</td>
+      <td>«God sympathizes with outsiders.»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>interview</td>
+      <td class="war-ctx">Донбаська кампанія</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2022-08-28</td>
+      <td>«design that touches the human heart.»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>interview</td>
+      <td class="war-ctx">Донбаська кампанія</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2022-11-07</td>
+      <td>«Алфавіт світу або розмова про зустрічі з літерами, книгами»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>interview</td>
+      <td class="war-ctx">звільнення Херсона</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2022-11-07</td>
+      <td>«Українська писемність та мова в манускриптах і друкарстві»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>interview</td>
+      <td class="war-ctx">звільнення Херсона</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2022-11-07</td>
+      <td>«Алфавіт світу або розмова про зустрічі з літерами, книгами та драконами»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>interview</td>
+      <td class="war-ctx">звільнення Херсона</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2023-06-29</td>
+      <td>«did something fell from the sky»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>other</td>
+      <td class="war-ctx">контрнаступ ЗСУ</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2023-12-15</td>
+      <td>«Погляд за обрій: книжковий та сакральний дизайн»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>other</td>
+      <td class="war-ctx">позиційна боротьба</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2024-06-18</td>
+      <td>«Музею книги і друкарства України»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>interview</td>
+      <td class="war-ctx">2024 — позиційна фаза</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2024-06-18</td>
+      <td>«Погляд за обрій. Літери, які говорять про свободу та віру»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>interview</td>
+      <td class="war-ctx">2024 — позиційна фаза</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2024-06-18</td>
+      <td>«Нова радість стала. Улюблені колядки та щедрівки»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>interview</td>
+      <td class="war-ctx">2024 — позиційна фаза</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2024-06-29</td>
+      <td>«Flowering Cyrillic or the Genesis of the Ukrainian Typography»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>media</td>
+      <td class="war-ctx">2024 — позиційна фаза</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2024-06-29</td>
+      <td>«Museum of Books and Printing of Ukraine.»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>media</td>
+      <td class="war-ctx">2024 — позиційна фаза</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2024-06-29</td>
+      <td>«A Gaze Beyond the Horizon: Letters Speaking of Freedom and Faith»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>media</td>
+      <td class="war-ctx">2024 — позиційна фаза</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2024-08-29</td>
+      <td>«,��L9TzRU(�Fr3��.��Sw��#�sg�N�!�o&#39;�8a�S��#MEr�:ߦ&amp;k����(Y2&gt;T��s����T��y*���&amp; ������qe�V���1փZ���Q� h/�(�$hp�^M&#39;�O\r!���8�6E�Q ��P� ��\�k�t�:�*W�&#39;�;��SxV:�@���v���=��;ALLi���(��/��O/?5�&amp;O����cQD�&gt;�d��»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>news</td>
+      <td class="war-ctx">2024 — позиційна фаза</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2024-08-29</td>
+      <td>«p�iM1C&#39;fy��!Jl�+�6� O���r��K����� �C�I���Q[�����+\(�CC�&amp;!�™+���@���-���6���� ��:2���y=�mNz�T~�GTo����*+^��i�,��IUra M�AUsb1�xFc�ͤ� �!ml��c�����~ȿ�Z%E�JjG�#����e�2$dփBdEǓ_m5&gt;��*͸&amp;d�D�5�ہ�= XO*t7(�|��B�`T�»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>news</td>
+      <td class="war-ctx">2024 — позиційна фаза</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2024-08-29</td>
+      <td>«7d�!;�S�.���&#39;m���G&#39;Cca�N�Go��jaX����\[Ƣ�0�ܔ��^�ЙF\�.wT&amp;T���QKN_��6Z`i�d@��C�[� $`�d.6�.ߊ�#���M�ӝ�a�/�n � i6�&lt;�@F���J»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>news</td>
+      <td class="war-ctx">2024 — позиційна фаза</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2024-10-29</td>
+      <td>«шрифтів та мистецтва того часу.»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx">курський напрямок</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2024-10-29</td>
+      <td>«, — розповів дизайнер.
+
+Новий дизайн Харківського драмтеатру. Зображення: Олексій Чекаль
+
+Акцентною фігурою дизайну є квітка. Її образ є динамічним та постійно змінюється»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx">курський напрямок</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2025-01-14</td>
+      <td>«Літери між мистецтвом та війною. Мультикультурні пошуки й сенсовий спротив»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx">2025 — продовження</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2025-01-14</td>
+      <td>«Олексій Чекаль проведе вас у захопливу подорож світом шрифтів, абеток та культур. Ви дізнаєтесь, як знання в палеографії, епіграфіці, теології та мистецтвознавстві допомагають створювати написи різними мовами: від грецької до сирійської»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx">2025 — продовження</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2025-01-14</td>
+      <td>«(Не)зрима спадщина. Близнюківщина»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx">2025 — продовження</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2025-01-16</td>
+      <td>«Шкода, що ми не дуже часто втілюємо в наше життя ці досягнення. У нас є свій art and craft. У нас є Василь Кричевський, у нас є [Опанас] Сластьон. Ми сидимо поряд із Худпромом із чудовим українським модерном. Це частина нашого art and craft»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx">2025 — продовження</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2025-01-16</td>
+      <td>«Наприклад, із цитатами Юрія Шевельова: &#34;Ми світу будемо цікавими лише модерними&#34;. Такі інтелектуальні вислови наносимо на мерч. Мені здається, це збагачує у просторі міста інтелектуальну присутність української культури»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx">2025 — продовження</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2025-01-16</td>
+      <td>«Накипіло з Філіппом Диканем»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx">2025 — продовження</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2025-09-09</td>
+      <td>«складнощі представлення [в Росії] українських культурних заходів, у зв&#39;язку з такою непростою обстановкою [війною?]»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx">2025 — продовження</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2025-09-09</td>
+      <td>«Каллиграфия в церковном искусстве»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx">2025 — продовження</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2025-09-09</td>
+      <td>«восстановление исторической справедливости»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx">2025 — продовження</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2026-05-13</td>
+      <td>«Коментарів на Книгу Буття»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx">2025 — продовження</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2026-05-13</td>
+      <td>«Днем Українського Шрифтаря»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx">2025 — продовження</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">2026-05-13</td>
+      <td>«буду лізти у всі щілини. І не важливо де ця ідея зверхнього панування живе: у голові російського зека в окопах на чужій землі, у голові програміста, що розраховує політ ракети по українським містам, чи у голові історика, що підтасовує історичні факти заради влади. Поки»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx">2025 — продовження</td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">—</td>
+      <td>«Давида Чичкана lvivart.center
+
+4 роки тому
+
+Лекція про чорні діри. Космічні монстри lvivart.center
+
+4 роки тому
+
+Львівський муніципальний дзен. З медитації немає користі lvivart.center
+
+4 роки тому
+
+SPIV BRATIV - Велике Інтерв&#39;ю з»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>other</td>
+      <td class="war-ctx"></td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">—</td>
+      <td>«Світло у темряві світить. Свідоцтво Російської Православної Церкви в роки радянських гонінь»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx"></td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">—</td>
+      <td>«По їхніх плодах ви пізнаєте їх. Хіба збирають виноград з тернини, або фіги із будяків?»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx"></td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">—</td>
+      <td>«Радійте тому, що імена ваші записані на небесах»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx"></td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">—</td>
+      <td>«Шкода, що ми не дуже часто втілюємо в наше життя ці досягнення. У нас є свій art and craft. У нас є Василь Кричевський, у нас є [Опанас] Сластьон. Ми сидимо поряд із Худпромом із чудовим українським модерном. Це частина нашого art and craft»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx"></td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">—</td>
+      <td>«Наприклад, із цитатами Юрія Шевельова: &#34;Ми світу будемо цікавими лише модерними&#34;. Такі інтелектуальні вислови наносимо на мерч. Мені здається, це збагачує у просторі міста інтелектуальну присутність української культури»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx"></td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">—</td>
+      <td>«Накипіло з Філіппом Диканем»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx"></td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">—</td>
+      <td>«Музею книги і друкарства України»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>instagram</td>
+      <td class="war-ctx"></td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">—</td>
+      <td>«шрифтів та мистецтва того часу.»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx"></td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">—</td>
+      <td>«, — розповів дизайнер.
+
+![](data:image/gif;base64,R0lGODlhAQABAAAAADs=)
+
+Новий дизайн Харківського драмтеатру. Зображення: Олексій Чекаль
+
+Акцентною фігурою дизайну є квітка. Її образ є динамічним та постійно змінюється»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>bio</td>
+      <td class="war-ctx"></td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">—</td>
+      <td>«Музею книги і друкарства України»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>interview</td>
+      <td class="war-ctx"></td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">—</td>
+      <td>«Погляд за обрій. Літери, які говорять про свободу та віру»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>interview</td>
+      <td class="war-ctx"></td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">—</td>
+      <td>«Нова радість стала. Улюблені колядки та щедрівки»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>interview</td>
+      <td class="war-ctx"></td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">—</td>
+      <td>«Погляд за обрій: книжковий та сакральний дизайн Олексія Чекаля»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>other</td>
+      <td class="war-ctx"></td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">—</td>
+      <td>«Погляд за обрій: книжковий та сакральний дизайн»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>other</td>
+      <td class="war-ctx"></td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">—</td>
+      <td>«Click to copy this page&#39;s address to your clipboard»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>other</td>
+      <td class="war-ctx"></td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+    <tr data-rt="unknown">
+      <td style="white-space:nowrap">—</td>
+      <td>«did something fell from the sky»</td>
+      <td style="color:#4b5563;font-size:0.82rem">[regex]</td>
+      <td>other</td>
+      <td class="war-ctx"></td>
+      <td><span class="rt-unknown">unknown</span></td>
+      <td><span class="conf-regex">regex</span></td>
+    </tr>
+    
+  </tbody>
+</table>
+
+
+
+<!-- 1b. Contradictions -->
+
+
+
+<!-- 2. Timeline -->
+<h2>Таймлайн подій</h2>
+
+<table>
+  <thead>
+    <tr><th style="width:90px">Дата</th><th>Подія</th><th style="width:110px">Місце</th><th style="width:130px">War context</th><th>Джерело</th></tr>
+  </thead>
+  <tbody>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2011-01-19</td>
+      <td>Oleksii Chekal - Independent Researcher</td>
+      <td>loc_kyiv</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><small><a href="https://independent.academia.edu/OleksiyChekal" target="_blank" rel="noopener">https://independent.academia.edu/OleksiyChekal…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2013-01-22</td>
+      <td>Каллиграфия в Церкви, или О битве со смыслами, управлении словами и восхвалении имени Божьего | Правмир</td>
+      <td>loc_рим</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><small><a href="https://www.pravmir.ru/kalligrafiya-v-tserkvi-ili-o-bitve-so-smyislami-upravlenii-slovami-i-voshvalenii-imeni-bozhego/" target="_blank" rel="noopener">https://www.pravmir.ru/kalligrafiya-v-tserkvi-ili-o-bit…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2018-09-30</td>
+      <td>Алексей Чекаль: «Современный человек устал от компьютерной эстетики»</td>
+      <td>loc_kharkiv</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><small><a href="https://web.archive.org/web/20220706221538/https:/2day.kh.ua/ru/news/aleksey-chekal-sovremennyy-chelovek-ustal-ot-kompyuternoy-estetiki" target="_blank" rel="noopener">https://web.archive.org/web/20220706221538/https:/2day.…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2020-02-23</td>
+      <td>Автор логотипу ПЦУ Чекаль про проєкт для правнучки Мони Лізи, «хіпі» в каліграфії і про те, що не так з гривнею</td>
+      <td>loc_київ</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><small><a href="https://www.radiosvoboda.org/a/30444078.html" target="_blank" rel="noopener">https://www.radiosvoboda.org/a/30444078.html…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2020-04-27</td>
+      <td>Олексій Чекаль про створення графічного стилю Православної церкви України</td>
+      <td>loc_рим</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><small><a href="https://www.radiosvoboda.org/a/29904016.html" target="_blank" rel="noopener">https://www.radiosvoboda.org/a/29904016.html…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2021-09-13</td>
+      <td>Про дизайн та дизайнерів. Інтерв&#39;ю з Олексієм Чекалем - CASES</td>
+      <td>loc_рим</td>
+      <td class="war-ctx">до повномасштабного вторгнення</td>
+      <td><small><a href="https://cases.media/article/pro-dizain-i-dizaineriv" target="_blank" rel="noopener">https://cases.media/article/pro-dizain-i-dizaineriv…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2022-05-26</td>
+      <td>&#34;Бог існує там, де того хоче. Напевно, донедавна був у підвалах Азовсталі&#34;, — Олексій Чекаль, автор графічного стилю для ПЦУ - РІСУ</td>
+      <td>loc_київ</td>
+      <td class="war-ctx">відступ з Київщини / Маріуполь</td>
+      <td><small><a href="https://risu.ua/bog-isnuye-tam-de-togo-hoche-napevno-donedavna-buv-u-pidvalah-azovstali--oleksij-chekal-avtor-grafichnogo-stilyu-dlya-pcu_n129579" target="_blank" rel="noopener">https://risu.ua/bog-isnuye-tam-de-togo-hoche-napevno-do…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2022-06-27</td>
+      <td>Oleksiy Chekal: The Multilingual Calligraphic Artist of Ukraine</td>
+      <td>—</td>
+      <td class="war-ctx">Донбаська кампанія</td>
+      <td><small><a href="https://www.linkedin.com/pulse/more-story-multilingual-calligraphy-oleksiy-chekal-gracen-farrell" target="_blank" rel="noopener">https://www.linkedin.com/pulse/more-story-multilingual-…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2022-08-28</td>
+      <td>Multilingual Calligraphic Artist of Ukraine (Interview) - Behance</td>
+      <td>loc_kyiv</td>
+      <td class="war-ctx">Донбаська кампанія</td>
+      <td><small><a href="https://www.behance.net/gallery/146739317/Multilingual-Calligraphic-Artist-of-Ukraine-(Interview)" target="_blank" rel="noopener">https://www.behance.net/gallery/146739317/Multilingual-…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2022-09-27</td>
+      <td>Ми з тобою однієї крові — Bird In Flight</td>
+      <td>loc_київ</td>
+      <td class="war-ctx">Харківський контрнаступ</td>
+      <td><small><a href="https://birdinflight.com/nathnennya-2/project-uk/20220927-mi-z-toboyu-odniyeyi-krovi-chekachkov.html" target="_blank" rel="noopener">https://birdinflight.com/nathnennya-2/project-uk/202209…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2022-11-07</td>
+      <td>Лекція Олексія Чекаля «Алфавіт світу або розмова про зустрічі з літерами, книгами» | Педагогічний музей України</td>
+      <td>loc_рим</td>
+      <td class="war-ctx">звільнення Херсона</td>
+      <td><small><a href="https://pmu.in.ua/museum_pedagogics/alpfavit/" target="_blank" rel="noopener">https://pmu.in.ua/museum_pedagogics/alpfavit/…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2023-06-29</td>
+      <td>The Daily Heller: Graphic Design and the Fog of War</td>
+      <td>loc_kyiv</td>
+      <td class="war-ctx">контрнаступ ЗСУ</td>
+      <td><small><a href="https://www.printmag.com/daily-heller/the-daily-heller-design-through-the-fog-of-war/" target="_blank" rel="noopener">https://www.printmag.com/daily-heller/the-daily-heller-…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2023-12-15</td>
+      <td>Погляд за обрій: книжковий та сакральний дизайн Олексія Чекаля | Музей книги і друкарства України</td>
+      <td>loc_київ</td>
+      <td class="war-ctx">позиційна боротьба</td>
+      <td><small><a href="https://www.mkdu.com.ua/pohliad-za-obrij/" target="_blank" rel="noopener">https://www.mkdu.com.ua/pohliad-za-obrij/…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2024-06-18</td>
+      <td>Олексій Чекаль: Естетика графічного спротиву та шрифт на службі національної й релігійної ідентичності | Інтерв&#39;ю з України</td>
+      <td>loc_харків</td>
+      <td class="war-ctx">2024 — позиційна фаза</td>
+      <td><small><a href="https://rozmova.wordpress.com/2024/06/18/oleksiy-chekal-3/" target="_blank" rel="noopener">https://rozmova.wordpress.com/2024/06/18/oleksiy-chekal…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2024-06-29</td>
+      <td>Aesthetics of Graphic Resistance and Typeface in the Service of National and Religious Identity - RISU</td>
+      <td>loc_kyiv</td>
+      <td class="war-ctx">2024 — позиційна фаза</td>
+      <td><small><a href="https://risu.ua/en/aesthetics-of-graphic-resistance-and-typeface-in-the-service-of-national-and-religious-identity_n149288" target="_blank" rel="noopener">https://risu.ua/en/aesthetics-of-graphic-resistance-and…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2024-08-29</td>
+      <td>Oleksiy Chekal: Letters and Meanings - HUDPROM</td>
+      <td>—</td>
+      <td class="war-ctx">2024 — позиційна фаза</td>
+      <td><small><a href="https://hudprom.org.ua/index.php/hp/article/view/49" target="_blank" rel="noopener">https://hudprom.org.ua/index.php/hp/article/view/49…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2024-10-29</td>
+      <td>Дизайнер Олексій Чекаль розробив новий дизайн для ...</td>
+      <td>loc_київ</td>
+      <td class="war-ctx">курський напрямок</td>
+      <td><small><a href="https://pragmatika.media/news/dyzajner-oleksij-chekal-rozrobyv-novyj-dyzajn-dlia-kharkivskoho-dramteatru/" target="_blank" rel="noopener">https://pragmatika.media/news/dyzajner-oleksij-chekal-r…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2025-01-14</td>
+      <td>У Харкові відбудеться лекція дизайнера Олексія Чекаля</td>
+      <td>loc_харків</td>
+      <td class="war-ctx">2025 — продовження</td>
+      <td><small><a href="https://lyuk.media/news/lecture-from-chekal/" target="_blank" rel="noopener">https://lyuk.media/news/lecture-from-chekal/…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2025-01-16</td>
+      <td>дизайнер і каліграф Олексій Чекаль - Радіо «Накипіло</td>
+      <td>loc_харків</td>
+      <td class="war-ctx">2025 — продовження</td>
+      <td><small><a href="https://radio.nakypilo.ua/stvoryuyemo-modu-na-znahidky-ukrayinskyh-mytcziv-dyzajner-i-kaligraf-oleksij-chekal/" target="_blank" rel="noopener">https://radio.nakypilo.ua/stvoryuyemo-modu-na-znahidky-…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2025-09-09</td>
+      <td>Чекаль Олексій Георгійович - Вікіцитати</td>
+      <td>loc_київ</td>
+      <td class="war-ctx">2025 — продовження</td>
+      <td><small><a href="https://uk.wikiquote.org/wiki/%D0%A7%D0%B5%D0%BA%D0%B0%D0%BB%D1%8C_%D0%9E%D0%BB%D0%B5%D0%BA%D1%81%D1%96%D0%B9_%D0%93%D0%B5%D0%BE%D1%80%D0%B3%D1%96%D0%B9%D0%BE%D0%B2%D0%B8%D1%87" target="_blank" rel="noopener">https://uk.wikiquote.org/wiki/%D0%A7%D0%B5%D0%BA%D0%B0%…</a></small></td>
+    </tr>
+    
+    
+    <tr>
+      <td style="white-space:nowrap">2026-05-13</td>
+      <td>oleksii chekal | Graphic Designer, Master Calligrapher, Art Historian, Professor In Florence Classical Arts Academy</td>
+      <td>loc_київ</td>
+      <td class="war-ctx">2025 — продовження</td>
+      <td><small><a href="https://linkedin.com/in/oleksii-chekal-48a73722" target="_blank" rel="noopener">https://linkedin.com/in/oleksii-chekal-48a73722…</a></small></td>
+    </tr>
+    
+  </tbody>
+</table>
+
+
+
+<!-- 3. Network -->
+<h2>Мережа звʼязків</h2>
+
+<p style="font-size:0.8rem;color:#6b7280;margin:0 0 0.4rem">
+  Показано 50 унікальних субʼєктів (відсортовано за наявністю ризик-міток).
+</p>
+<table>
+  <thead>
+    <tr><th>Організація / Особа</th><th style="width:110px">Тип звʼязку</th><th style="width:80px">Період</th><th>Контекст</th><th>Цитата-доказ</th><th style="width:140px">Ризик-мітки</th></tr>
+  </thead>
+  <tbody>
+    
+    <tr>
+      <td>Research Institute</td>
+      <td>організаційний</td>
+      <td>2024-06-29T13:20:00.000Z</td>
+      <td>Згадується у: Aesthetics of Graphic Resistance and Typeface in the Service of National and Rel</td>
+      <td class="evidence-q">2024
+
+Finally, I would like to rephrase the thoughts of the renowned scholar and Ukrainian studies expert Omeljan Pritsak, who founded the Ukrainian Research Institute at Harvard and whose book of int</td>
+      <td><span class="flag-risk">russian world, russian orthodox church</span></td>
+    </tr>
+    
+    <tr>
+      <td>Sheptytsky Center</td>
+      <td>організаційний</td>
+      <td>2024-06-29T13:20:00.000Z</td>
+      <td>Згадується у: Aesthetics of Graphic Resistance and Typeface in the Service of National and Rel</td>
+      <td class="evidence-q">At the Sheptytsky Center at UCU, his exhibition &#34;A Gaze Beyond the Horizon: Letters Speaking of Freedom and Faith&#34; is ongoing.</td>
+      <td><span class="flag-risk">russian world, russian orthodox church</span></td>
+    </tr>
+    
+    <tr>
+      <td>Charitable Foundation</td>
+      <td>організаційний</td>
+      <td>2024-06-29T13:20:00.000Z</td>
+      <td>Згадується у: Aesthetics of Graphic Resistance and Typeface in the Service of National and Rel</td>
+      <td class="evidence-q">Design for safe Keeper (manufacturer-Universal project company &#34;glass&#34; (@sklo.official), the author of the idea is Andriy Khlyvnyuk (Andriy Khlyvnyuk), the initiator is the Andriy Khlyvnyuk Charitable</td>
+      <td><span class="flag-risk">russian world, russian orthodox church</span></td>
+    </tr>
+    
+    <tr>
+      <td>Aesthetics of Graphic Resistance and Typeface</td>
+      <td>організаційний</td>
+      <td>2024-06-29T13:20:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">Aesthetics of Graphic Resistance and Typeface in the Service of National and Religious Identity - RISU
+
+- Home page
+- Publications
+- Interview
+- Aesthetics of Graphic Resistance and Typeface in the Se</td>
+      <td><span class="flag-risk">russian world, russian orthodox church</span></td>
+    </tr>
+    
+    <tr>
+      <td>Orthodox Church of Ukraine</td>
+      <td>організаційний</td>
+      <td>2024-06-29T13:20:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">We discuss why it is important to resist in terms of meaning with Oleksiy Chekal, a designer, typographer, calligrapher, visiting professor at the Florence Classical Arts Academy, author of the graphi</td>
+      <td><span class="flag-risk">russian world, russian orthodox church</span></td>
+    </tr>
+    
+    <tr>
+      <td>Ukrainian Roman Catholics</td>
+      <td>організаційний</td>
+      <td>2024-06-29T13:20:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">On the other hand, I have worked a lot in Italy with the Catholic Church, I have been cooperating with Ukrainian Roman Catholics, and I have completed several interesting projects with Greek Catholics</td>
+      <td><span class="flag-risk">russian world, russian orthodox church</span></td>
+    </tr>
+    
+    <tr>
+      <td>Greek Catholics</td>
+      <td>організаційний</td>
+      <td>2024-06-29T13:20:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">On the other hand, I have worked a lot in Italy with the Catholic Church, I have been cooperating with Ukrainian Roman Catholics, and I have completed several interesting projects with Greek Catholics</td>
+      <td><span class="flag-risk">russian world, russian orthodox church</span></td>
+    </tr>
+    
+    <tr>
+      <td>Andriy Poturaylo</td>
+      <td>особистий</td>
+      <td>2024-06-29T13:20:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">For example, here is a piece created for the &#39;Ababahalamaga&#39; publishing house together with my late friend Andriy Poturaylo, dedicated to Ukrainian Christmas: &#39;A New Joy Has Come.</td>
+      <td><span class="flag-risk">russian world, russian orthodox church</span></td>
+    </tr>
+    
+    <tr>
+      <td>Santuario Madonna del Miracolo</td>
+      <td>організаційний</td>
+      <td>2022-08-28T00:00:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">There was an interesting project to develop a graphic treatment for a sanctuary in Rome, Santuario Madonna del Miracolo (Basilica di Sant&#39;Andrea delle Fratte) and the exhibition on the Madonna of Alfo</td>
+      <td><span class="flag-risk">russian orthodox church</span></td>
+    </tr>
+    
+    <tr>
+      <td>Гарвардсього університет</td>
+      <td>організаційний</td>
+      <td>—</td>
+      <td>Згадується у: Олексій Чекаль: Естетика графічного спротиву та шрифт на ...</td>
+      <td class="evidence-q">Languages, Texts, Objects, Images.&#34;
+
+Є дуже дорогі для мене проєкти, наприклад, оформлення монастиря в Римі, каліграфія для Гарвардсього університету, дизайн для наукових конференцій в Оксфорді.</td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>УПЦ МП</td>
+      <td>організаційний</td>
+      <td>—</td>
+      <td>Згадується у: Олексій Чекаль: Естетика графічного спротиву та шрифт на ...</td>
+      <td class="evidence-q">Ініціатива](https://rozmova.wordpress.com/category/1-%d0%b3%d1%80%d1%83%d0%b4%d0%bd%d1%8f-%d1%96%d0%bd%d1%96%d1%86%d1%96%d0%b0%d1%82%d0%b8%d0%b2%d0%b0/)
+  + [Єрко Владислав](https://rozmova.wordpress.</td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Віттенберзького університет</td>
+      <td>організаційний</td>
+      <td>—</td>
+      <td>Згадується у: Олексій Чекаль: Естетика графічного спротиву та шрифт на ...</td>
+      <td class="evidence-q">![Комбінаторий принцип побудови логотипу для Галле-Віттенберзького університету імені Мартіна Лютера для кафедри світової історії християнства та східних християнських студій.</td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>ПЦУ</td>
+      <td>організаційний</td>
+      <td>—</td>
+      <td>Згадується у: Олексій Чекаль: Естетика графічного спротиву та шрифт на ...</td>
+      <td class="evidence-q">Про те, чому важливо чинити сенсовий спротив, говоримо з Олексієм Чекалем ― дизайнером, шрифторобом, каліграфом, запрошеним професором Florence Classical Arts Academy, автором графічного образу та сти</td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>УГКЦ</td>
+      <td>організаційний</td>
+      <td>—</td>
+      <td>Згадується у: Олексій Чекаль: Естетика графічного спротиву та шрифт на ...</td>
+      <td class="evidence-q">Ініціатива](https://rozmova.wordpress.com/category/1-%d0%b3%d1%80%d1%83%d0%b4%d0%bd%d1%8f-%d1%96%d0%bd%d1%96%d1%86%d1%96%d0%b0%d1%82%d0%b8%d0%b2%d0%b0/)
+  + [Єрко Владислав](https://rozmova.wordpress.</td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>УПЦ</td>
+      <td>організаційний</td>
+      <td>—</td>
+      <td>Згадується у: Олексій Чекаль: Естетика графічного спротиву та шрифт на ...</td>
+      <td class="evidence-q">Ініціатива](https://rozmova.wordpress.com/category/1-%d0%b3%d1%80%d1%83%d0%b4%d0%bd%d1%8f-%d1%96%d0%bd%d1%96%d1%86%d1%96%d0%b0%d1%82%d0%b8%d0%b2%d0%b0/)
+  + [Єрко Владислав](https://rozmova.wordpress.</td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Вадим Юник</td>
+      <td>особистий</td>
+      <td>—</td>
+      <td></td>
+      <td class="evidence-q">[Інтерв&#39;ю з України](https://rozmova.wordpress.com/ &#34;Інтерв&#39;ю з України&#34;)
+
+[Перейти до вмісту](#content &#34;Перейти до вмісту&#34;)
+
+* [Домівка](https://rozmova.wordpress.com/)
+* [Книги-інтерв&#39;ю](https://roz</td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Ганна Гопко</td>
+      <td>особистий</td>
+      <td>—</td>
+      <td></td>
+      <td class="evidence-q">Збудувати індустрію, яка створить армію дронів](https://rozmova.wordpress.com/2024/06/18/vadym-unyk-3/)
+
+[Ганна Гопко: «Мирний» план Путіна, санкції проти РФ, Зеленський в Саудівській Аравії та саміт </td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Олексій Чекаль</td>
+      <td>особистий</td>
+      <td>—</td>
+      <td></td>
+      <td class="evidence-q">Збудувати індустрію, яка створить армію дронів](https://rozmova.wordpress.com/2024/06/18/vadym-unyk-3/)
+
+[Ганна Гопко: «Мирний» план Путіна, санкції проти РФ, Зеленський в Саудівській Аравії та саміт </td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Олексієм Чекалем</td>
+      <td>особистий</td>
+      <td>—</td>
+      <td></td>
+      <td class="evidence-q">Про те, чому важливо чинити сенсовий спротив, говоримо з Олексієм Чекалем ― дизайнером, шрифторобом, каліграфом, запрошеним професором Florence Classical Arts Academy, автором графічного образу та сти</td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Florence Classical Arts Academy</td>
+      <td>організаційний</td>
+      <td>—</td>
+      <td></td>
+      <td class="evidence-q">Про те, чому важливо чинити сенсовий спротив, говоримо з Олексієм Чекалем ― дизайнером, шрифторобом, каліграфом, запрошеним професором Florence Classical Arts Academy, автором графічного образу та сти</td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Центрі Шептицького</td>
+      <td>організаційний</td>
+      <td>—</td>
+      <td></td>
+      <td class="evidence-q">У Центрі Шептицького в УКУ триває його виставка «Погляд за обрій.</td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Центру Шептицького</td>
+      <td>організаційний</td>
+      <td>—</td>
+      <td></td>
+      <td class="evidence-q">Виставка тривала у холі Центру Шептицького до 14-го червня включно.*
+
+***― Чому саме ці роботи ви обрали для теперішньої виставки?***
+
+― Я обрав частину робіт, яка висвітлює міжрелігійні зв&#39;язки.</td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Православною Церквою України</td>
+      <td>організаційний</td>
+      <td>—</td>
+      <td></td>
+      <td class="evidence-q">Багато працюю з Православною Церквою України, розробляю її графічний стиль, шрифти, видання та логотипи різних єпархій та парафій, починаючи з дизайну для Об&#39;єднавчого Собору 2018-го року.</td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Об&#39;єднавчого Собору 2018-го року</td>
+      <td>організаційний</td>
+      <td>—</td>
+      <td></td>
+      <td class="evidence-q">Багато працюю з Православною Церквою України, розробляю її графічний стиль, шрифти, видання та логотипи різних єпархій та парафій, починаючи з дизайну для Об&#39;єднавчого Собору 2018-го року.</td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Українським католицьким університетом</td>
+      <td>організаційний</td>
+      <td>—</td>
+      <td></td>
+      <td class="evidence-q">З іншого боку, я багато працював в Італії з Католицькою Церквою, працюю з українськими римо-католиками, зробив декілька цікавих проєктів з греко-католиками, зокрема з Українським католицьким університ</td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Церквам Сходу</td>
+      <td>особистий</td>
+      <td>—</td>
+      <td></td>
+      <td class="evidence-q">Приділяю увагу Церквам Сходу, особливо традиціям сирійського обряду.</td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Дмитру Цоліну</td>
+      <td>особистий</td>
+      <td>—</td>
+      <td></td>
+      <td class="evidence-q">Для цього багато років вчуся та допомагаю в сходознавчих студіях Дмитру Цоліну, який зараз викладає в УКУ та робить чудовий проєкт «Від слова до Слова», дизайн якого я теж робив.</td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Григорієм Сковородою</td>
+      <td>особистий</td>
+      <td>—</td>
+      <td></td>
+      <td class="evidence-q">![Різні логотипи для греко- та римо-католицьких проєктів - фото 135776](https://risu.ua/uploads/media_news/2024/06/666e9c9d02e78247801120.jpg &#34;Різні логотипи для греко- та римо-католицьких проєктів - </td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>ДУХОВНА ЗБРОЯ СКОВОРОДИ</td>
+      <td>організаційний</td>
+      <td>—</td>
+      <td></td>
+      <td class="evidence-q">Плакати для проєкту «ДУХОВНА ЗБРОЯ СКОВОРОДИ» для музею Сковороди у Сковородинівці - фото 135762](https://risu.ua/uploads/media_news/2024/06/666e95780baef008345313.jpg &#34;Фрагмент виставки.</td>
+      <td><span class="flag-risk">рпц, ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Андрієм Потурайлом</td>
+      <td>особистий</td>
+      <td>2024-06-18T18:30:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">Наприклад, тут є робота, створена для видавництва «Абабагаламага» разом з моїм другом ― на жаль, уже покійним Андрієм Потурайлом, що присвячена українському Різдву: «Нова радість стала.</td>
+      <td><span class="flag-risk">рпц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Андрія Потурайло</td>
+      <td>особистий</td>
+      <td>2024-06-18T18:30:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">Малюнки Андрія Потурайло.</td>
+      <td><span class="flag-risk">рпц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Православної Церкви України</td>
+      <td>організаційний</td>
+      <td>2024-06-18T18:30:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">Плакати з проєктами для Православної Церкви України та грецьких Церков.</td>
+      <td><span class="flag-risk">рпц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Якова Гніздовського</td>
+      <td>особистий</td>
+      <td>2024-06-18T18:30:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">Ось, наприклад, паркан для церкви в Харкові з текстом «Отче наш», зроблений в дусі Якова Гніздовського.</td>
+      <td><span class="flag-risk">рпц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Броди Нойеншвандер</td>
+      <td>особистий</td>
+      <td>2022-05-26T08:40:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">Нещодавно великий каліграф Броди Нойеншвандер (Brody Neuenschwander) запросив мене взяти участь у проєкті «A Brush with Silence», де каліграфи з усього світу писатимуть тексти на підтримку України.</td>
+      <td><span class="flag-risk">ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Brody Neuenschwander</td>
+      <td>особистий</td>
+      <td>2022-05-26T08:40:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">Нещодавно великий каліграф Броди Нойеншвандер (Brody Neuenschwander) запросив мене взяти участь у проєкті «A Brush with Silence», де каліграфи з усього світу писатимуть тексти на підтримку України.</td>
+      <td><span class="flag-risk">ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>The Typophiles</td>
+      <td>організаційний</td>
+      <td>2022-05-26T08:40:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">А в найавторитетнішому дизайнерському товаристві The Typophiles в Америці я скоро робитиму доповідь, де покажу наскільки українське дизайнерське модерне мислення може бути корисним для інших культур т</td>
+      <td><span class="flag-risk">ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Юрій Чорноморець</td>
+      <td>особистий</td>
+      <td>2022-05-26T08:40:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">Мій друг Юрій Чорноморець (провідний філософ й видатний український патролог й богослов) займається разом з Павлом Гайдаєм логістикою снайперських груп.</td>
+      <td><span class="flag-risk">ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Павлом Гайдаєм</td>
+      <td>особистий</td>
+      <td>2022-05-26T08:40:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">Мій друг Юрій Чорноморець (провідний філософ й видатний український патролог й богослов) займається разом з Павлом Гайдаєм логістикою снайперських груп.</td>
+      <td><span class="flag-risk">ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Петра Буїнцева</td>
+      <td>особистий</td>
+      <td>2022-05-26T08:40:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">Але в дитинстві ми з батьками часто бували в гостях у в&#39;язня сталінських таборів Петра Буїнцева, який просидів з українськими політв&#39;язнями 25 років.</td>
+      <td><span class="flag-risk">ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Юрко Гуцуляк</td>
+      <td>особистий</td>
+      <td>2022-05-26T08:40:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">Дуже потужний плакат з цього приводу днями зробив мій друг дизайнер Юрко Гуцуляк на замовлення Нью-Йоркського агентства ThoughtMatter «Lesson #1: Russia lied, Russia lies, Russia will lie».</td>
+      <td><span class="flag-risk">ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Нью-Йоркського агентства ThoughtMatter</td>
+      <td>організаційний</td>
+      <td>2022-05-26T08:40:00.000Z</td>
+      <td></td>
+      <td class="evidence-q">Дуже потужний плакат з цього приводу днями зробив мій друг дизайнер Юрко Гуцуляк на замовлення Нью-Йоркського агентства ThoughtMatter «Lesson #1: Russia lied, Russia lies, Russia will lie».</td>
+      <td><span class="flag-risk">ркц</span></td>
+    </tr>
+    
+    <tr>
+      <td>Oleksiy Chekal</td>
+      <td>організаційний</td>
+      <td>—</td>
+      <td></td>
+      <td class="evidence-q">Oleksii Chekal - design, calligrapher, art-director (chekal.alex@gmail.com) in Kharkiv, Ukraine :: Behance
+
+# Oleksii Chekal
+
+- design, calligrapher, art-director (chekal.alex@gmail.com)
+- Kharkiv, Uk</td>
+      <td></td>
+    </tr>
+    
+    <tr>
+      <td>The Ukrainian</td>
+      <td>організаційний</td>
+      <td>—</td>
+      <td></td>
+      <td class="evidence-q">The King of Ukraine
+
+Ancient Egyptian Literature in Ukrainian Translations
+
+47 appreciations for Ancient Egyptian Literature in Ukrainian Translations333 views for Ancient Egyptian Literature in Ukrai</td>
+      <td></td>
+    </tr>
+    
+    <tr>
+      <td>Оксфордський університет</td>
+      <td>організаційний</td>
+      <td>2020-02-23T21:50:43.000Z</td>
+      <td>Згадується у: Автор логотипу ПЦУ Чекаль про проєкт для правнучки Мони Лізи, «хіпі» в каліграфі</td>
+      <td class="evidence-q">Роблю дизайн наукових конференцій, де співорганізатором є Оксфордський університет.</td>
+      <td></td>
+    </tr>
+    
+    <tr>
+      <td>Харківському університет</td>
+      <td>організаційний</td>
+      <td>2020-02-23T21:50:43.000Z</td>
+      <td>Згадується у: Автор логотипу ПЦУ Чекаль про проєкт для правнучки Мони Лізи, «хіпі» в каліграфі</td>
+      <td class="evidence-q">Здобула ступінь магістра за спеціальністю «тележурналістика» у Харківському університеті імені Василя Каразіна.</td>
+      <td></td>
+    </tr>
+    
+    <tr>
+      <td>Оксфордського університет</td>
+      <td>організаційний</td>
+      <td>2020-02-23T21:50:43.000Z</td>
+      <td>Згадується у: Автор логотипу ПЦУ Чекаль про проєкт для правнучки Мони Лізи, «хіпі» в каліграфі</td>
+      <td class="evidence-q">Додайте нас у Google
+
+ВАЖЛИВО
+
+# Автор логотипу ПЦУ Чекаль про проєкт для правнучки Мони Лізи, «хіпі» в каліграфії і про те, що не так з гривнею
+
+Каліграфія Олексія Чекаля Фото:Oleksiy Chekal (Courtes</td>
+      <td></td>
+    </tr>
+    
+    <tr>
+      <td>Мони Лізи</td>
+      <td>особистий</td>
+      <td>2020-02-23T21:50:43.000Z</td>
+      <td></td>
+      <td class="evidence-q">Автор логотипу ПЦУ Чекаль про проєкт для правнучки Мони Лізи, «хіпі» в каліграфії і про те, що не так з гривнею
+
+Меню
+
+##### Крим Реалії
+
+##### ДОЛУЧАЙСЯ!</td>
+      <td></td>
+    </tr>
+    
+    <tr>
+      <td>Автор логотипу ПЦУ</td>
+      <td>організаційний</td>
+      <td>2020-02-23T21:50:43.000Z</td>
+      <td></td>
+      <td class="evidence-q">Автор логотипу ПЦУ Чекаль про проєкт для правнучки Мони Лізи, «хіпі» в каліграфії і про те, що не так з гривнею
+
+Меню
+
+##### Крим Реалії
+
+##### ДОЛУЧАЙСЯ!</td>
+      <td></td>
+    </tr>
+    
+    <tr>
+      <td>Олексія Чекаля</td>
+      <td>особистий</td>
+      <td>2020-02-23T21:50:43.000Z</td>
+      <td></td>
+      <td class="evidence-q">Додайте нас у Google
+
+ВАЖЛИВО
+
+# Автор логотипу ПЦУ Чекаль про проєкт для правнучки Мони Лізи, «хіпі» в каліграфії і про те, що не так з гривнею
+
+Каліграфія Олексія Чекаля Фото:Oleksiy Chekal (Courtes</td>
+      <td></td>
+    </tr>
+    
+    <tr>
+      <td>Вселенського патріарха Варфоломія</td>
+      <td>особистий</td>
+      <td>2020-02-23T21:50:43.000Z</td>
+      <td></td>
+      <td class="evidence-q">Додайте нас у Google
+
+ВАЖЛИВО
+
+# Автор логотипу ПЦУ Чекаль про проєкт для правнучки Мони Лізи, «хіпі» в каліграфії і про те, що не так з гривнею
+
+Каліграфія Олексія Чекаля Фото:Oleksiy Chekal (Courtes</td>
+      <td></td>
+    </tr>
+    
+  </tbody>
+</table>
+
+
+
+<!-- 4. Accounts -->
+<h2>Акаунти</h2>
+
+<table>
+  <thead>
+    <tr><th style="width:100px">Платформа</th><th style="width:130px">Handle</th><th>URL</th><th>Bio</th><th style="width:90px">First seen</th></tr>
+  </thead>
+  <tbody>
+    
+    <tr>
+      <td>behance</td>
+      <td>PaLaMa</td>
+      <td><a href="https://www.behance.net/PaLaMa?locale=en_US" target="_blank" rel="noopener">https://www.behance.net/PaLaMa?locale=en_US</a></td>
+      <td style="font-size:0.82rem;color:#4b5563"></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>instagram</td>
+      <td>oleksiy_chekal</td>
+      <td><a href="https://www.instagram.com/oleksiy_chekal?hl=en" target="_blank" rel="noopener">https://www.instagram.com/oleksiy_chekal?hl=en</a></td>
+      <td style="font-size:0.82rem;color:#4b5563"></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>instagram</td>
+      <td>p</td>
+      <td><a href="https://www.instagram.com/p/DNnvGeRM0rX" target="_blank" rel="noopener">https://www.instagram.com/p/DNnvGeRM0rX</a></td>
+      <td style="font-size:0.82rem;color:#4b5563"></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>linkedin</td>
+      <td>oleksii-chekal-48a73722</td>
+      <td><a href="https://linkedin.com/in/oleksii-chekal-48a73722" target="_blank" rel="noopener">https://linkedin.com/in/oleksii-chekal-48a73722</a></td>
+      <td style="font-size:0.82rem;color:#4b5563"></td>
+      <td>2026-05-13T18:48:22.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>academia</td>
+      <td>OleksiyChekal</td>
+      <td><a href="https://independent.academia.edu/OleksiyChekal" target="_blank" rel="noopener">https://independent.academia.edu/OleksiyChekal</a></td>
+      <td style="font-size:0.82rem;color:#4b5563"></td>
+      <td>2011-01-19T15:10:42.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>reddit</td>
+      <td>chekal_oleksii</td>
+      <td><a href="https://www.reddit.com/user/chekal_oleksii" target="_blank" rel="noopener">https://www.reddit.com/user/chekal_oleksii</a></td>
+      <td style="font-size:0.82rem;color:#4b5563">Знайдено за збігом username. Може належати іншій особі.</td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>reddit</td>
+      <td>chekaloleksii</td>
+      <td><a href="https://www.reddit.com/user/chekaloleksii" target="_blank" rel="noopener">https://www.reddit.com/user/chekaloleksii</a></td>
+      <td style="font-size:0.82rem;color:#4b5563">Знайдено за збігом username. Може належати іншій особі.</td>
+      <td>—</td>
+    </tr>
+    
+  </tbody>
+</table>
+
+
+
+<!-- 5. Geoclusters -->
+
+<h2>Просторово-часові кластери</h2>
+<table>
+  <thead>
+    <tr><th>Тип</th><th>Період</th><th>Місто</th><th>Країна</th><th style="width:100px">Кількість подій</th></tr>
+  </thead>
+  <tbody>
+    
+    
+    <tr>
+      <td>event</td>
+      <td>2011</td>
+      <td>Kyiv</td>
+      <td>Ukraine</td>
+      <td>1</td>
+    </tr>
+    
+    
+    <tr>
+      <td>event</td>
+      <td>2013</td>
+      <td>Рим</td>
+      <td>Італія</td>
+      <td>1</td>
+    </tr>
+    
+    
+    <tr>
+      <td>event</td>
+      <td>2018</td>
+      <td>Kharkiv</td>
+      <td>Ukraine</td>
+      <td>1</td>
+    </tr>
+    
+    
+    <tr>
+      <td>event</td>
+      <td>2020</td>
+      <td>Київ</td>
+      <td>Україна</td>
+      <td>1</td>
+    </tr>
+    
+    
+    <tr>
+      <td>event</td>
+      <td>2020</td>
+      <td>Рим</td>
+      <td>Італія</td>
+      <td>1</td>
+    </tr>
+    
+    
+    <tr>
+      <td>event</td>
+      <td>2021</td>
+      <td>Рим</td>
+      <td>Італія</td>
+      <td>1</td>
+    </tr>
+    
+    
+    <tr>
+      <td>event</td>
+      <td>2022</td>
+      <td>Київ</td>
+      <td>Україна</td>
+      <td>2</td>
+    </tr>
+    
+    
+    <tr>
+      <td>event</td>
+      <td>2022</td>
+      <td>Kyiv</td>
+      <td>Ukraine</td>
+      <td>1</td>
+    </tr>
+    
+    
+    <tr>
+      <td>event</td>
+      <td>2022</td>
+      <td>Рим</td>
+      <td>Італія</td>
+      <td>1</td>
+    </tr>
+    
+    
+    <tr>
+      <td>event</td>
+      <td>2023</td>
+      <td>Kyiv</td>
+      <td>Ukraine</td>
+      <td>1</td>
+    </tr>
+    
+    
+    <tr>
+      <td>event</td>
+      <td>2023</td>
+      <td>Київ</td>
+      <td>Україна</td>
+      <td>1</td>
+    </tr>
+    
+    
+    <tr>
+      <td>event</td>
+      <td>2024</td>
+      <td>Харків</td>
+      <td>Україна</td>
+      <td>1</td>
+    </tr>
+    
+    
+    <tr>
+      <td>event</td>
+      <td>2024</td>
+      <td>Kyiv</td>
+      <td>Ukraine</td>
+      <td>1</td>
+    </tr>
+    
+    
+    <tr>
+      <td>event</td>
+      <td>2024</td>
+      <td>Київ</td>
+      <td>Україна</td>
+      <td>1</td>
+    </tr>
+    
+    
+    <tr>
+      <td>event</td>
+      <td>2025</td>
+      <td>Харків</td>
+      <td>Україна</td>
+      <td>2</td>
+    </tr>
+    
+    
+    <tr>
+      <td>event</td>
+      <td>2025</td>
+      <td>Київ</td>
+      <td>Україна</td>
+      <td>1</td>
+    </tr>
+    
+    
+    <tr>
+      <td>event</td>
+      <td>2026</td>
+      <td>Київ</td>
+      <td>Україна</td>
+      <td>1</td>
+    </tr>
+    
+  </tbody>
+</table>
+
+
+
+<!-- 6. Sources -->
+<h2>Джерела (44)</h2>
+<table>
+  <thead>
+    <tr><th style="width:32px">#</th><th style="width:80px">Тип</th><th>Заголовок</th><th>URL</th><th style="width:90px">Дата</th></tr>
+  </thead>
+  <tbody>
+    
+    <tr>
+      <td>1</td>
+      <td>project</td>
+      <td>Oleksii Chekal - Behance<br><small style="color:#9ca3af;font-size:0.74rem">Oleksii Chekal - Behance [Електронний ресурс]. URL: https://www.behance.net/PaLaMa?locale=en_US (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://www.behance.net/PaLaMa?locale=en_US" target="_blank" rel="noopener">https://www.behance.net/PaLaMa?locale=en_US</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>2</td>
+      <td>bio</td>
+      <td>Автор логотипу ПЦУ Чекаль про проєкт для правнучки Мони Лізи, «хіпі» в каліграфії і про те, що не так з гривнею<br><small style="color:#9ca3af;font-size:0.74rem">Автор логотипу ПЦУ Чекаль про проєкт для правнучки Мони Лізи, «хіпі» в каліграфії і про те, що не так з гривнею [Електронний ресурс]. 2020. URL: https://www.radiosvoboda.org/a/30444078.html (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://www.radiosvoboda.org/a/30444078.html" target="_blank" rel="noopener">https://www.radiosvoboda.org/a/30444078.html</a></td>
+      <td>2020-02-23T21:50:43.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>3</td>
+      <td>interview</td>
+      <td>Олексій Чекаль: Естетика графічного спротиву та шрифт на службі національної й релігійної ідентичності | Інтерв&#39;ю з України<br><small style="color:#9ca3af;font-size:0.74rem">Олексій Чекаль: Естетика графічного спротиву та шрифт на службі національної й релігійної ідентичності | Інтерв&#39;ю з України [Електронний ресурс]. 2024. URL: https://rozmova.wordpress.com/2024/06/18/oleksiy-chekal-3/ (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://rozmova.wordpress.com/2024/06/18/oleksiy-chekal-3/" target="_blank" rel="noopener">https://rozmova.wordpress.com/2024/06/18/oleksiy-chekal-3/</a></td>
+      <td>2024-06-18T18:30:00.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>4</td>
+      <td>other</td>
+      <td>Погляд за обрій: книжковий та сакральний дизайн Олексія Чекаля | Музей книги і друкарства України<br><small style="color:#9ca3af;font-size:0.74rem">Погляд за обрій: книжковий та сакральний дизайн Олексія Чекаля | Музей книги і друкарства України [Електронний ресурс]. 2023. URL: https://www.mkdu.com.ua/pohliad-za-obrij/ (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://www.mkdu.com.ua/pohliad-za-obrij/" target="_blank" rel="noopener">https://www.mkdu.com.ua/pohliad-za-obrij/</a></td>
+      <td>2023-12-15T18:35:46.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>5</td>
+      <td>bio</td>
+      <td>Олексій Чекаль - Видавництво Старого Лева<br><small style="color:#9ca3af;font-size:0.74rem">Олексій Чекаль - Видавництво Старого Лева [Електронний ресурс]. URL: https://starylev.com.ua/old-lion/author/oleksiy-cekal (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://starylev.com.ua/old-lion/author/oleksiy-cekal" target="_blank" rel="noopener">https://starylev.com.ua/old-lion/author/oleksiy-cekal</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>6</td>
+      <td>interview</td>
+      <td>Олексій Чекаль про створення графічного стилю Православної церкви України<br><small style="color:#9ca3af;font-size:0.74rem">Олексій Чекаль про створення графічного стилю Православної церкви України [Електронний ресурс]. 2020. URL: https://www.radiosvoboda.org/a/29904016.html (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://www.radiosvoboda.org/a/29904016.html" target="_blank" rel="noopener">https://www.radiosvoboda.org/a/29904016.html</a></td>
+      <td>2020-04-27T10:45:00.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>7</td>
+      <td>bio</td>
+      <td>&#34;Бог існує там, де того хоче. Напевно, донедавна був у підвалах Азовсталі&#34;, — Олексій Чекаль, автор графічного стилю для ПЦУ - РІСУ<br><small style="color:#9ca3af;font-size:0.74rem">&#34;Бог існує там, де того хоче. Напевно, донедавна був у підвалах Азовсталі&#34;, — Олексій Чекаль, автор графічного стилю для ПЦУ - РІСУ [Електронний ресурс]. 2022. URL: https://risu.ua/bog-isnuye-tam-de-togo-hoche-napevno-donedavna-buv-u-pidvalah-azovstali--oleksij-chekal-avtor-grafichnogo-stilyu-dlya-pcu_n129579 (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://risu.ua/bog-isnuye-tam-de-togo-hoche-napevno-donedavna-buv-u-pidvalah-azovstali--oleksij-chekal-avtor-grafichnogo-stilyu-dlya-pcu_n129579" target="_blank" rel="noopener">https://risu.ua/bog-isnuye-tam-de-togo-hoche-napevno-donedavna-bu…</a></td>
+      <td>2022-05-26T08:40:00.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>8</td>
+      <td>bio</td>
+      <td>дизайнер і каліграф Олексій Чекаль - Радіо «Накипіло<br><small style="color:#9ca3af;font-size:0.74rem">дизайнер і каліграф Олексій Чекаль - Радіо «Накипіло [Електронний ресурс]. 2025. URL: https://radio.nakypilo.ua/stvoryuyemo-modu-na-znahidky-ukrayinskyh-mytcziv-dyzajner-i-kaligraf-oleksij-chekal/ (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://radio.nakypilo.ua/stvoryuyemo-modu-na-znahidky-ukrayinskyh-mytcziv-dyzajner-i-kaligraf-oleksij-chekal/" target="_blank" rel="noopener">https://radio.nakypilo.ua/stvoryuyemo-modu-na-znahidky-ukrayinsky…</a></td>
+      <td>2025-01-16T10:02:23.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>9</td>
+      <td>other</td>
+      <td>Лекція про виникнення кириличної писемності Олексія Чекаля / ТиДиви<br><small style="color:#9ca3af;font-size:0.74rem">Лекція про виникнення кириличної писемності Олексія Чекаля / ТиДиви [Електронний ресурс]. URL: https://tydyvy.com/video/DyklGmE (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://tydyvy.com/video/DyklGmE" target="_blank" rel="noopener">https://tydyvy.com/video/DyklGmE</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>10</td>
+      <td>bio</td>
+      <td>Чекаль Олексій Георгійович - Вікіцитати<br><small style="color:#9ca3af;font-size:0.74rem">Чекаль Олексій Георгійович - Вікіцитати [Електронний ресурс]. 2025. URL: https://uk.wikiquote.org/wiki/%D0%A7%D0%B5%D0%BA%D0%B0%D0%BB%D1%8C_%D0%9E%D0%BB%D0%B5%D0%BA%D1%81%D1%96%D0%B9_%D0%93%D0%B5%D0%BE%D1%80%D0%B3%D1%96%D0%B9%D0%BE%D0%B2%D0%B8%D1%87 (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://uk.wikiquote.org/wiki/%D0%A7%D0%B5%D0%BA%D0%B0%D0%BB%D1%8C_%D0%9E%D0%BB%D0%B5%D0%BA%D1%81%D1%96%D0%B9_%D0%93%D0%B5%D0%BE%D1%80%D0%B3%D1%96%D0%B9%D0%BE%D0%B2%D0%B8%D1%87" target="_blank" rel="noopener">https://uk.wikiquote.org/wiki/%D0%A7%D0%B5%D0%BA%D0%B0%D0%BB%D1%8…</a></td>
+      <td>2025-09-09T22:39:26.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>11</td>
+      <td>other</td>
+      <td>Олексій Чекаль &#34;Літери та сенси&#34; - Львівська Національна Академія Мистецтв<br><small style="color:#9ca3af;font-size:0.74rem">Олексій Чекаль &#34;Літери та сенси&#34; - Львівська Національна Академія Мистецтв [Електронний ресурс]. URL: https://lnam.edu.ua/uk/event/oleksij-chekal-literi-ta-sensi.html (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://lnam.edu.ua/uk/event/oleksij-chekal-literi-ta-sensi.html" target="_blank" rel="noopener">https://lnam.edu.ua/uk/event/oleksij-chekal-literi-ta-sensi.html</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>12</td>
+      <td>bio</td>
+      <td>У Харкові відбудеться лекція дизайнера Олексія Чекаля<br><small style="color:#9ca3af;font-size:0.74rem">У Харкові відбудеться лекція дизайнера Олексія Чекаля [Електронний ресурс]. 2025. URL: https://lyuk.media/news/lecture-from-chekal/ (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://lyuk.media/news/lecture-from-chekal/" target="_blank" rel="noopener">https://lyuk.media/news/lecture-from-chekal/</a></td>
+      <td>2025-01-14T09:23:56.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>13</td>
+      <td>bio</td>
+      <td>Каліграфія в Церкві, або Про битву зі смислами, управлінні словами і вихвалянні імені Божого | Православ&#39;я і світ<br><small style="color:#9ca3af;font-size:0.74rem">Каліграфія в Церкві, або Про битву зі смислами, управлінні словами і вихвалянні імені Божого | Православ&#39;я і світ [Електронний ресурс]. URL: https://muzruk.if.ua/info/kaligrafia/uk/bukva-kaligrafia-v-cerkvi-abo-pro-bitvu-zi-smislami-upravlinni-slovami-i-vihvalanni-imeni-bozogo/ (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://muzruk.if.ua/info/kaligrafia/uk/bukva-kaligrafia-v-cerkvi-abo-pro-bitvu-zi-smislami-upravlinni-slovami-i-vihvalanni-imeni-bozogo/" target="_blank" rel="noopener">https://muzruk.if.ua/info/kaligrafia/uk/bukva-kaligrafia-v-cerkvi…</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>14</td>
+      <td>interview</td>
+      <td>Лекція Олексія Чекаля «Алфавіт світу або розмова про зустрічі з літерами, книгами» | Педагогічний музей України<br><small style="color:#9ca3af;font-size:0.74rem">Лекція Олексія Чекаля «Алфавіт світу або розмова про зустрічі з літерами, книгами» | Педагогічний музей України [Електронний ресурс]. 2022. URL: https://pmu.in.ua/museum_pedagogics/alpfavit/ (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://pmu.in.ua/museum_pedagogics/alpfavit/" target="_blank" rel="noopener">https://pmu.in.ua/museum_pedagogics/alpfavit/</a></td>
+      <td>2022-11-07T17:21:38.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>15</td>
+      <td>other</td>
+      <td>Олексій Чекаль – Погляд за обрій: літери, які говорять - YouTube<br><small style="color:#9ca3af;font-size:0.74rem">Олексій Чекаль – Погляд за обрій: літери, які говорять - YouTube [Електронний ресурс]. URL: https://www.youtube.com/watch?v=YzZ9_UrEb5w (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://www.youtube.com/watch?v=YzZ9_UrEb5w" target="_blank" rel="noopener">https://www.youtube.com/watch?v=YzZ9_UrEb5w</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>16</td>
+      <td>social</td>
+      <td>calligraphy, design, typo (@oleksiy_chekal) - Instagram<br><small style="color:#9ca3af;font-size:0.74rem">calligraphy, design, typo (@oleksiy_chekal) - Instagram [Електронний ресурс]. URL: https://www.instagram.com/oleksiy_chekal?hl=en (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://www.instagram.com/oleksiy_chekal?hl=en" target="_blank" rel="noopener">https://www.instagram.com/oleksiy_chekal?hl=en</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>17</td>
+      <td>bio</td>
+      <td>дизайнер і каліграф Олексій Чекаль - Радіо «Накипіло<br><small style="color:#9ca3af;font-size:0.74rem">дизайнер і каліграф Олексій Чекаль - Радіо «Накипіло [Електронний ресурс]. URL: https://radio.nakypilo.ua/stvoryuyemo-modu-na-znahidky-ukrayinskyh-mytcziv-dyzajner-i-kaligraf-oleksij-chekal (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://radio.nakypilo.ua/stvoryuyemo-modu-na-znahidky-ukrayinskyh-mytcziv-dyzajner-i-kaligraf-oleksij-chekal" target="_blank" rel="noopener">https://radio.nakypilo.ua/stvoryuyemo-modu-na-znahidky-ukrayinsky…</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>18</td>
+      <td>other</td>
+      <td>[PDF] ОЛЕКСІЙ ЧЕКАЛЬ: ЛІТЕРИ І СЕНСИ<br><small style="color:#9ca3af;font-size:0.74rem">[PDF] ОЛЕКСІЙ ЧЕКАЛЬ: ЛІТЕРИ І СЕНСИ [Електронний ресурс]. URL: https://repository.ac.kharkov.ua/bitstreams/a904aad9-0b9c-487f-b4e1-9a485f19418b/download (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://repository.ac.kharkov.ua/bitstreams/a904aad9-0b9c-487f-b4e1-9a485f19418b/download" target="_blank" rel="noopener">https://repository.ac.kharkov.ua/bitstreams/a904aad9-0b9c-487f-b4…</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>19</td>
+      <td>bio</td>
+      <td>Олексій Чекаль — дизайнер, типограф, каліграф ... - Instagram<br><small style="color:#9ca3af;font-size:0.74rem">Олексій Чекаль — дизайнер, типограф, каліграф ... - Instagram [Електронний ресурс]. URL: https://www.instagram.com/p/DNnvGeRM0rX (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://www.instagram.com/p/DNnvGeRM0rX" target="_blank" rel="noopener">https://www.instagram.com/p/DNnvGeRM0rX</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>20</td>
+      <td>bio</td>
+      <td>Олексій Чекаль: літери і сенси - ResearchGate<br><small style="color:#9ca3af;font-size:0.74rem">Олексій Чекаль: літери і сенси - ResearchGate [Електронний ресурс]. URL: https://www.researchgate.net/publication/391571537_Oleksij_Cekal_literi_i_sensi (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://www.researchgate.net/publication/391571537_Oleksij_Cekal_literi_i_sensi" target="_blank" rel="noopener">https://www.researchgate.net/publication/391571537_Oleksij_Cekal_…</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>21</td>
+      <td>bio</td>
+      <td>Про дизайн та дизайнерів. Інтерв&#39;ю з Олексієм Чекалем - CASES<br><small style="color:#9ca3af;font-size:0.74rem">Про дизайн та дизайнерів. Інтерв&#39;ю з Олексієм Чекалем - CASES [Електронний ресурс]. 2021. URL: https://cases.media/article/pro-dizain-i-dizaineriv (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://cases.media/article/pro-dizain-i-dizaineriv" target="_blank" rel="noopener">https://cases.media/article/pro-dizain-i-dizaineriv</a></td>
+      <td>2021-09-13T08:05:00.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>22</td>
+      <td>news</td>
+      <td>Алексей Чекаль: «Современный человек устал от компьютерной эстетики»<br><small style="color:#9ca3af;font-size:0.74rem">Алексей Чекаль: «Современный человек устал от компьютерной эстетики» [Електронний ресурс]. 2018. URL: https://web.archive.org/web/20220706221538/https:/2day.kh.ua/ru/news/aleksey-chekal-sovremennyy-chelovek-ustal-ot-kompyuternoy-estetiki (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://web.archive.org/web/20220706221538/https:/2day.kh.ua/ru/news/aleksey-chekal-sovremennyy-chelovek-ustal-ot-kompyuternoy-estetiki" target="_blank" rel="noopener">https://web.archive.org/web/20220706221538/https:/2day.kh.ua/ru/n…</a></td>
+      <td>2018-09-30T16:27:21.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>23</td>
+      <td>bio</td>
+      <td>Дизайнер Олексій Чекаль розробив новий дизайн для ...<br><small style="color:#9ca3af;font-size:0.74rem">Дизайнер Олексій Чекаль розробив новий дизайн для ... [Електронний ресурс]. 2024. URL: https://pragmatika.media/news/dyzajner-oleksij-chekal-rozrobyv-novyj-dyzajn-dlia-kharkivskoho-dramteatru/ (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://pragmatika.media/news/dyzajner-oleksij-chekal-rozrobyv-novyj-dyzajn-dlia-kharkivskoho-dramteatru/" target="_blank" rel="noopener">https://pragmatika.media/news/dyzajner-oleksij-chekal-rozrobyv-no…</a></td>
+      <td>2024-10-29T08:47:36.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>24</td>
+      <td>bio</td>
+      <td>Дизайнер Олексій Чекаль розробив новий дизайн для ...<br><small style="color:#9ca3af;font-size:0.74rem">Дизайнер Олексій Чекаль розробив новий дизайн для ... [Електронний ресурс]. URL: https://pragmatika.media/news/dyzajner-oleksij-chekal-rozrobyv-novyj-dyzajn-dlia-kharkivskoho-dramteatru (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://pragmatika.media/news/dyzajner-oleksij-chekal-rozrobyv-novyj-dyzajn-dlia-kharkivskoho-dramteatru" target="_blank" rel="noopener">https://pragmatika.media/news/dyzajner-oleksij-chekal-rozrobyv-no…</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>25</td>
+      <td>interview</td>
+      <td>Олексій Чекаль: Естетика графічного спротиву та шрифт на ...<br><small style="color:#9ca3af;font-size:0.74rem">Олексій Чекаль: Естетика графічного спротиву та шрифт на ... [Електронний ресурс]. URL: https://rozmova.wordpress.com/2024/06/18/oleksiy-chekal-3 (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://rozmova.wordpress.com/2024/06/18/oleksiy-chekal-3" target="_blank" rel="noopener">https://rozmova.wordpress.com/2024/06/18/oleksiy-chekal-3</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>26</td>
+      <td>news</td>
+      <td>View of Oleksiy Chekal: Letters and Meanings - HUDPROM<br><small style="color:#9ca3af;font-size:0.74rem">View of Oleksiy Chekal: Letters and Meanings - HUDPROM [Електронний ресурс]. URL: https://hudprom.org.ua/hp/article/view/49/109 (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://hudprom.org.ua/hp/article/view/49/109" target="_blank" rel="noopener">https://hudprom.org.ua/hp/article/view/49/109</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>27</td>
+      <td>project</td>
+      <td>Ми з тобою однієї крові — Bird In Flight<br><small style="color:#9ca3af;font-size:0.74rem">Ми з тобою однієї крові — Bird In Flight [Електронний ресурс]. 2022. URL: https://birdinflight.com/nathnennya-2/project-uk/20220927-mi-z-toboyu-odniyeyi-krovi-chekachkov.html (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://birdinflight.com/nathnennya-2/project-uk/20220927-mi-z-toboyu-odniyeyi-krovi-chekachkov.html" target="_blank" rel="noopener">https://birdinflight.com/nathnennya-2/project-uk/20220927-mi-z-to…</a></td>
+      <td>2022-09-27T05:58:15.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>28</td>
+      <td>other</td>
+      <td>Погляд за обрій: книжковий та сакральний дизайн Олексія Чекаля<br><small style="color:#9ca3af;font-size:0.74rem">Погляд за обрій: книжковий та сакральний дизайн Олексія Чекаля [Електронний ресурс]. URL: https://www.mkdu.com.ua/pohliad-za-obrij (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://www.mkdu.com.ua/pohliad-za-obrij" target="_blank" rel="noopener">https://www.mkdu.com.ua/pohliad-za-obrij</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>29</td>
+      <td>interview</td>
+      <td>Aesthetics of Graphic Resistance and Typeface in the Service of National and Religious Identity - RISU<br><small style="color:#9ca3af;font-size:0.74rem">Aesthetics of Graphic Resistance and Typeface in the Service of National and Religious Identity - RISU [Електронний ресурс]. 2024. URL: https://risu.ua/en/aesthetics-of-graphic-resistance-and-typeface-in-the-service-of-national-and-religious-identity_n149288 (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://risu.ua/en/aesthetics-of-graphic-resistance-and-typeface-in-the-service-of-national-and-religious-identity_n149288" target="_blank" rel="noopener">https://risu.ua/en/aesthetics-of-graphic-resistance-and-typeface-…</a></td>
+      <td>2024-06-29T13:20:00.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>30</td>
+      <td>other</td>
+      <td>Oleksiy Chekal: The Multilingual Calligraphic Artist of Ukraine<br><small style="color:#9ca3af;font-size:0.74rem">Oleksiy Chekal: The Multilingual Calligraphic Artist of Ukraine [Електронний ресурс]. 2022. URL: https://www.linkedin.com/pulse/more-story-multilingual-calligraphy-oleksiy-chekal-gracen-farrell (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://www.linkedin.com/pulse/more-story-multilingual-calligraphy-oleksiy-chekal-gracen-farrell" target="_blank" rel="noopener">https://www.linkedin.com/pulse/more-story-multilingual-calligraph…</a></td>
+      <td>2022-06-27T19:14:35.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>31</td>
+      <td>interview</td>
+      <td>Multilingual Calligraphic Artist of Ukraine (Interview) - Behance<br><small style="color:#9ca3af;font-size:0.74rem">Multilingual Calligraphic Artist of Ukraine (Interview) - Behance [Електронний ресурс]. 2022. URL: https://www.behance.net/gallery/146739317/Multilingual-Calligraphic-Artist-of-Ukraine-(Interview) (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://www.behance.net/gallery/146739317/Multilingual-Calligraphic-Artist-of-Ukraine-(Interview)" target="_blank" rel="noopener">https://www.behance.net/gallery/146739317/Multilingual-Calligraph…</a></td>
+      <td>2022-08-28T00:00:00.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>32</td>
+      <td>bio</td>
+      <td>oleksii chekal | Graphic Designer, Master Calligrapher, Art Historian, Professor In Florence Classical Arts Academy<br><small style="color:#9ca3af;font-size:0.74rem">oleksii chekal | Graphic Designer, Master Calligrapher, Art Historian, Professor In Florence Classical Arts Academy [Електронний ресурс]. 2026. URL: https://linkedin.com/in/oleksii-chekal-48a73722 (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://linkedin.com/in/oleksii-chekal-48a73722" target="_blank" rel="noopener">https://linkedin.com/in/oleksii-chekal-48a73722</a></td>
+      <td>2026-05-13T18:48:22.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>33</td>
+      <td>project</td>
+      <td>Flowering Cyrillic or the Genesis of the Ukrainian Typography | cooperedu<br><small style="color:#9ca3af;font-size:0.74rem">Flowering Cyrillic or the Genesis of the Ukrainian Typography | cooperedu [Електронний ресурс]. URL: https://cooper.edu/events-and-exhibitions/events/flowering-cyrillic-or-genesis-ukrainian-typography (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://cooper.edu/events-and-exhibitions/events/flowering-cyrillic-or-genesis-ukrainian-typography" target="_blank" rel="noopener">https://cooper.edu/events-and-exhibitions/events/flowering-cyrill…</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>34</td>
+      <td>news</td>
+      <td>Oleksiy Chekal: Letters and Meanings - HUDPROM<br><small style="color:#9ca3af;font-size:0.74rem">Oleksiy Chekal: Letters and Meanings - HUDPROM [Електронний ресурс]. 2024. URL: https://hudprom.org.ua/index.php/hp/article/view/49 (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://hudprom.org.ua/index.php/hp/article/view/49" target="_blank" rel="noopener">https://hudprom.org.ua/index.php/hp/article/view/49</a></td>
+      <td>2024-08-29T00:00:00.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>35</td>
+      <td>bio</td>
+      <td>Oleksii Chekal - Independent Researcher<br><small style="color:#9ca3af;font-size:0.74rem">Oleksii Chekal - Independent Researcher [Електронний ресурс]. 2011. URL: https://independent.academia.edu/OleksiyChekal (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://independent.academia.edu/OleksiyChekal" target="_blank" rel="noopener">https://independent.academia.edu/OleksiyChekal</a></td>
+      <td>2011-01-19T15:10:42.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>36</td>
+      <td>other</td>
+      <td>Oleksii Chekal<br><small style="color:#9ca3af;font-size:0.74rem">Oleksii Chekal [Електронний ресурс]. URL: https://luc.devroye.org/fonts-93530.html (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://luc.devroye.org/fonts-93530.html" target="_blank" rel="noopener">https://luc.devroye.org/fonts-93530.html</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>37</td>
+      <td>bio</td>
+      <td>Description: Олексій Чекаль :: NVK CVTI SR<br><small style="color:#9ca3af;font-size:0.74rem">Description: Олексій Чекаль :: NVK CVTI SR [Електронний ресурс]. URL: https://ersearch2.cvtisr.sk/vufind/EdsRecord/edsdoj,edsdoj.3752ebb12d124a52a685f5cb0a5b5698 (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://ersearch2.cvtisr.sk/vufind/EdsRecord/edsdoj,edsdoj.3752ebb12d124a52a685f5cb0a5b5698" target="_blank" rel="noopener">https://ersearch2.cvtisr.sk/vufind/EdsRecord/edsdoj,edsdoj.3752eb…</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>38</td>
+      <td>other</td>
+      <td>Oleksii Chekal - TypoLub - Teatr NN<br><small style="color:#9ca3af;font-size:0.74rem">Oleksii Chekal - TypoLub - Teatr NN [Електронний ресурс]. URL: https://teatrnn.pl/typolub/oleksii-chekal/ (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://teatrnn.pl/typolub/oleksii-chekal/" target="_blank" rel="noopener">https://teatrnn.pl/typolub/oleksii-chekal/</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>39</td>
+      <td>other</td>
+      <td>The Daily Heller: Graphic Design and the Fog of War<br><small style="color:#9ca3af;font-size:0.74rem">The Daily Heller: Graphic Design and the Fog of War [Електронний ресурс]. 2023. URL: https://www.printmag.com/daily-heller/the-daily-heller-design-through-the-fog-of-war/ (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://www.printmag.com/daily-heller/the-daily-heller-design-through-the-fog-of-war/" target="_blank" rel="noopener">https://www.printmag.com/daily-heller/the-daily-heller-design-thr…</a></td>
+      <td>2023-06-29T11:00:00.000Z</td>
+    </tr>
+    
+    <tr>
+      <td>40</td>
+      <td>other</td>
+      <td>Oleksiy Chekal - Florence Classical Arts Academy<br><small style="color:#9ca3af;font-size:0.74rem">Oleksiy Chekal - Florence Classical Arts Academy [Електронний ресурс]. URL: https://www.artac.org/oleksiy-chekal (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://www.artac.org/oleksiy-chekal" target="_blank" rel="noopener">https://www.artac.org/oleksiy-chekal</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>41</td>
+      <td>other</td>
+      <td>Oleksiy Chekal, the Multilingual Calligraphic Artist of Ukraine<br><small style="color:#9ca3af;font-size:0.74rem">Oleksiy Chekal, the Multilingual Calligraphic Artist of Ukraine [Електронний ресурс]. URL: https://multilingual.com/issues/june-2022/oleksiy-chekal (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://multilingual.com/issues/june-2022/oleksiy-chekal" target="_blank" rel="noopener">https://multilingual.com/issues/june-2022/oleksiy-chekal</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>42</td>
+      <td>project</td>
+      <td>Oleksiy Chekal | Dribbble<br><small style="color:#9ca3af;font-size:0.74rem">Oleksiy Chekal | Dribbble [Електронний ресурс]. URL: https://dribbble.com/oleksiychekal (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://dribbble.com/oleksiychekal" target="_blank" rel="noopener">https://dribbble.com/oleksiychekal</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>43</td>
+      <td>other</td>
+      <td>The Daily Heller: Graphic Design and the Fog of War<br><small style="color:#9ca3af;font-size:0.74rem">The Daily Heller: Graphic Design and the Fog of War [Електронний ресурс]. URL: https://www.printmag.com/daily-heller/the-daily-heller-design-through-the-fog-of-war (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://www.printmag.com/daily-heller/the-daily-heller-design-through-the-fog-of-war" target="_blank" rel="noopener">https://www.printmag.com/daily-heller/the-daily-heller-design-thr…</a></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td>44</td>
+      <td>other</td>
+      <td>Каллиграфия в Церкви, или О битве со смыслами, управлении словами и восхвалении имени Божьего | Правмир<br><small style="color:#9ca3af;font-size:0.74rem">Каллиграфия в Церкви, или О битве со смыслами, управлении словами и восхвалении имени Божьего | Правмир [Електронний ресурс]. 2013. URL: https://www.pravmir.ru/kalligrafiya-v-tserkvi-ili-o-bitve-so-smyislami-upravlenii-slovami-i-voshvalenii-imeni-bozhego/ (дата звернення: 06.06.2026)</small></td>
+      <td><a href="https://www.pravmir.ru/kalligrafiya-v-tserkvi-ili-o-bitve-so-smyislami-upravlenii-slovami-i-voshvalenii-imeni-bozhego/" target="_blank" rel="noopener">https://www.pravmir.ru/kalligrafiya-v-tserkvi-ili-o-bitve-so-smyi…</a></td>
+      <td>2013-01-22T05:00:01.000Z</td>
+    </tr>
+    
+  </tbody>
+</table>
+
+
+<script>
+const _statementsData = [{"statement_id": "stmt_2cf0cf4b", "date": "2011-01-19", "quote": "The Demonstration on the Faith", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "до повномасштабного вторгнення", "source_id": "9bacd322"}, {"statement_id": "stmt_71486586", "date": "2013-01-22", "quote": "Свет во тьме светит. Свидетельство Русской Православной Церкви в годы советских гонений", "summary": "[regex]", "platform": "other", "rhetoric_type": "unknown", "war_context": "до повномасштабного вторгнення", "source_id": "6446e346"}, {"statement_id": "stmt_a4f8b872", "date": "2013-01-22", "quote": "Иконография Евангелистов в Софии Киевской и каллиграфическая культура Византии", "summary": "[regex]", "platform": "other", "rhetoric_type": "unknown", "war_context": "до повномасштабного вторгнення", "source_id": "6446e346"}, {"statement_id": "stmt_0d09fd9a", "date": "2013-01-22", "quote": "По плодам их узнаете их. Собирают ли с терновника виноград, или с репейника смоквы?", "summary": "[regex]", "platform": "other", "rhetoric_type": "unknown", "war_context": "до повномасштабного вторгнення", "source_id": "6446e346"}, {"statement_id": "stmt_0bdc4ee8", "date": "2018-09-30", "quote": "Современный человек устал от компьютерной эстетики", "summary": "[regex]", "platform": "news", "rhetoric_type": "unknown", "war_context": "до повномасштабного вторгнення", "source_id": "9f234e45"}, {"statement_id": "stmt_1281041a", "date": "2018-09-30", "quote": "Світ ловив мене, та не впіймав", "summary": "[regex]", "platform": "news", "rhetoric_type": "unknown", "war_context": "до повномасштабного вторгнення", "source_id": "9f234e45"}, {"statement_id": "stmt_14211314", "date": "2018-09-30", "quote": "Каллиграфия помогает думать", "summary": "[regex]", "platform": "news", "rhetoric_type": "unknown", "war_context": "до повномасштабного вторгнення", "source_id": "9f234e45"}, {"statement_id": "stmt_ec7a0843", "date": "2020-02-23", "quote": "Високий друк та ілюстрація", "summary": "[regex]", "platform": "radio", "rhetoric_type": "unknown", "war_context": "до повномасштабного вторгнення", "source_id": "e64593a2"}, {"statement_id": "stmt_8e79681a", "date": "2020-02-23", "quote": "Під час цієї роботи я намагався зробити книгу-сад – такий собі «садок вишневий коло хати", "summary": "[regex]", "platform": "radio", "rhetoric_type": "unknown", "war_context": "до повномасштабного вторгнення", "source_id": "e64593a2"}, {"statement_id": "stmt_e4e21919", "date": "2020-02-23", "quote": "Українське народне мистецтво", "summary": "[regex]", "platform": "radio", "rhetoric_type": "unknown", "war_context": "до повномасштабного вторгнення", "source_id": "e64593a2"}, {"statement_id": "stmt_2a2a83fa", "date": "2021-09-13", "quote": "Світ ловив мене, та не спіймав", "summary": "[regex]", "platform": "interview", "rhetoric_type": "unknown", "war_context": "до повномасштабного вторгнення", "source_id": "db85ed67"}, {"statement_id": "stmt_1440d440", "date": "2021-09-13", "quote": "Я дуже люблю ось цей стілець, але на ньому ж неможливо сидіти", "summary": "[regex]", "platform": "interview", "rhetoric_type": "unknown", "war_context": "до повномасштабного вторгнення", "source_id": "db85ed67"}, {"statement_id": "stmt_b97a37ab", "date": "2021-09-13", "quote": "Господь симпатизує аутсайдерам", "summary": "[regex]", "platform": "interview", "rhetoric_type": "unknown", "war_context": "до повномасштабного вторгнення", "source_id": "db85ed67"}, {"statement_id": "stmt_cd645ad3", "date": "2022-05-26", "quote": "Lesson #1: Russia lied, Russia lies, Russia will lie", "summary": "[regex]", "platform": "media", "rhetoric_type": "unknown", "war_context": "відступ з Київщини / Маріуполь", "source_id": "929c5b3a"}, {"statement_id": "stmt_5981c94b", "date": "2022-05-26", "quote": "Світ ловив мене, та не впіймав", "summary": "[regex]", "platform": "media", "rhetoric_type": "unknown", "war_context": "відступ з Київщини / Маріуполь", "source_id": "929c5b3a"}, {"statement_id": "stmt_f55c8eb7", "date": "2022-05-26", "quote": "Всі звуться православними, однак між нами велика прірва", "summary": "[regex]", "platform": "media", "rhetoric_type": "unknown", "war_context": "відступ з Київщини / Маріуполь", "source_id": "929c5b3a"}, {"statement_id": "stmt_d3841513", "date": "2022-06-27", "quote": "The only request to people of different countries is to take interest in the history and culture of Ukraine. It will enrich your horizons and help us in our struggle and in the creation and restoration of the country after the victory and destruction.", "summary": "[regex]", "platform": "other", "rhetoric_type": "unknown", "war_context": "Донбаська кампанія", "source_id": "a0fed800"}, {"statement_id": "stmt_dced6656", "date": "2022-08-28", "quote": "The world tried to catch me but didn't succeed.", "summary": "[regex]", "platform": "interview", "rhetoric_type": "unknown", "war_context": "Донбаська кампанія", "source_id": "d025e2e1"}, {"statement_id": "stmt_3ee9fccd", "date": "2022-08-28", "quote": "God sympathizes with outsiders.", "summary": "[regex]", "platform": "interview", "rhetoric_type": "unknown", "war_context": "Донбаська кампанія", "source_id": "d025e2e1"}, {"statement_id": "stmt_43d5c2bb", "date": "2022-08-28", "quote": "design that touches the human heart.", "summary": "[regex]", "platform": "interview", "rhetoric_type": "unknown", "war_context": "Донбаська кампанія", "source_id": "d025e2e1"}, {"statement_id": "stmt_57d2175d", "date": "2022-11-07", "quote": "Алфавіт світу або розмова про зустрічі з літерами, книгами", "summary": "[regex]", "platform": "interview", "rhetoric_type": "unknown", "war_context": "звільнення Херсона", "source_id": "e924bca7"}, {"statement_id": "stmt_c3efd9f6", "date": "2022-11-07", "quote": "Українська писемність та мова в манускриптах і друкарстві", "summary": "[regex]", "platform": "interview", "rhetoric_type": "unknown", "war_context": "звільнення Херсона", "source_id": "e924bca7"}, {"statement_id": "stmt_e5f41afa", "date": "2022-11-07", "quote": "Алфавіт світу або розмова про зустрічі з літерами, книгами та драконами", "summary": "[regex]", "platform": "interview", "rhetoric_type": "unknown", "war_context": "звільнення Херсона", "source_id": "e924bca7"}, {"statement_id": "stmt_f84b27a7", "date": "2023-06-29", "quote": "did something fell from the sky", "summary": "[regex]", "platform": "other", "rhetoric_type": "unknown", "war_context": "контрнаступ ЗСУ", "source_id": "3e9e6812"}, {"statement_id": "stmt_47ac6b6d", "date": "2023-12-15", "quote": "Погляд за обрій: книжковий та сакральний дизайн", "summary": "[regex]", "platform": "other", "rhetoric_type": "unknown", "war_context": "позиційна боротьба", "source_id": "08a2e83f"}, {"statement_id": "stmt_7291a572", "date": "2024-06-18", "quote": "Музею книги і друкарства України", "summary": "[regex]", "platform": "interview", "rhetoric_type": "unknown", "war_context": "2024 — позиційна фаза", "source_id": "67bb2ed1"}, {"statement_id": "stmt_38d42b4d", "date": "2024-06-18", "quote": "Погляд за обрій. Літери, які говорять про свободу та віру", "summary": "[regex]", "platform": "interview", "rhetoric_type": "unknown", "war_context": "2024 — позиційна фаза", "source_id": "67bb2ed1"}, {"statement_id": "stmt_e7e171c6", "date": "2024-06-18", "quote": "Нова радість стала. Улюблені колядки та щедрівки", "summary": "[regex]", "platform": "interview", "rhetoric_type": "unknown", "war_context": "2024 — позиційна фаза", "source_id": "67bb2ed1"}, {"statement_id": "stmt_95d9e90c", "date": "2024-06-29", "quote": "Flowering Cyrillic or the Genesis of the Ukrainian Typography", "summary": "[regex]", "platform": "media", "rhetoric_type": "unknown", "war_context": "2024 — позиційна фаза", "source_id": "e636430e"}, {"statement_id": "stmt_ffcd1931", "date": "2024-06-29", "quote": "Museum of Books and Printing of Ukraine.", "summary": "[regex]", "platform": "media", "rhetoric_type": "unknown", "war_context": "2024 — позиційна фаза", "source_id": "e636430e"}, {"statement_id": "stmt_a03cc53a", "date": "2024-06-29", "quote": "A Gaze Beyond the Horizon: Letters Speaking of Freedom and Faith", "summary": "[regex]", "platform": "media", "rhetoric_type": "unknown", "war_context": "2024 — позиційна фаза", "source_id": "e636430e"}, {"statement_id": "stmt_711e9662", "date": "2024-08-29", "quote": ",��L9TzRU(�Fr3��.��Sw��#�sg�N�!�o'�8a�S��#MEr�:ߦ&k����(Y2>T��s����T��y*���& ������qe�V���1փZ���Q� h/�(�$hp�^M'�O\\r!���8�6E�Q ��P� ��\\�k�t�:�*W�'�;��SxV:�@���v���=��;ALLi���(��/��O/?5�&O����cQD�>�d��", "summary": "[regex]", "platform": "news", "rhetoric_type": "unknown", "war_context": "2024 — позиційна фаза", "source_id": "4bd50e0b"}, {"statement_id": "stmt_770da317", "date": "2024-08-29", "quote": "p�iM1C'fy��!Jl�+�6� O���r��K����� �C�I���Q[�����+\\(�CC�&!�™+���@���-���6���� ��:2���y=�mNz�T~�GTo����*+^��i�,��IUra M�AUsb1�xFc�ͤ� �!ml��c�����~ȿ�Z%E�JjG�#����e�2$dփBdEǓ_m5>��*͸&d�D�5�ہ�= XO*t7(�|��B�`T�", "summary": "[regex]", "platform": "news", "rhetoric_type": "unknown", "war_context": "2024 — позиційна фаза", "source_id": "4bd50e0b"}, {"statement_id": "stmt_25d9109d", "date": "2024-08-29", "quote": "7d�!;�S�.���'m���G'Cca�N�Go��jaX����\\[Ƣ�0�ܔ��^�ЙF\\�.wT&T���QKN_��6Z`i�d@��C�[� $`�d.6�.ߊ�#���M�ӝ�a�/�n � i6�<�@F���J", "summary": "[regex]", "platform": "news", "rhetoric_type": "unknown", "war_context": "2024 — позиційна фаза", "source_id": "4bd50e0b"}, {"statement_id": "stmt_1861fe13", "date": "2024-10-29", "quote": "шрифтів та мистецтва того часу.", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "курський напрямок", "source_id": "37ef9e85"}, {"statement_id": "stmt_6f7d2b8a", "date": "2024-10-29", "quote": ", — розповів дизайнер.\n\nНовий дизайн Харківського драмтеатру. Зображення: Олексій Чекаль\n\nАкцентною фігурою дизайну є квітка. Її образ є динамічним та постійно змінюється", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "курський напрямок", "source_id": "37ef9e85"}, {"statement_id": "stmt_6c4cac8d", "date": "2025-01-14", "quote": "Літери між мистецтвом та війною. Мультикультурні пошуки й сенсовий спротив", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "2025 — продовження", "source_id": "7e07f99e"}, {"statement_id": "stmt_b89928bd", "date": "2025-01-14", "quote": "Олексій Чекаль проведе вас у захопливу подорож світом шрифтів, абеток та культур. Ви дізнаєтесь, як знання в палеографії, епіграфіці, теології та мистецтвознавстві допомагають створювати написи різними мовами: від грецької до сирійської", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "2025 — продовження", "source_id": "7e07f99e"}, {"statement_id": "stmt_202bdbfc", "date": "2025-01-14", "quote": "(Не)зрима спадщина. Близнюківщина", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "2025 — продовження", "source_id": "7e07f99e"}, {"statement_id": "stmt_7354db23", "date": "2025-01-16", "quote": "Шкода, що ми не дуже часто втілюємо в наше життя ці досягнення. У нас є свій art and craft. У нас є Василь Кричевський, у нас є [Опанас] Сластьон. Ми сидимо поряд із Худпромом із чудовим українським модерном. Це частина нашого art and craft", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "2025 — продовження", "source_id": "60b5354d"}, {"statement_id": "stmt_32892792", "date": "2025-01-16", "quote": "Наприклад, із цитатами Юрія Шевельова: \"Ми світу будемо цікавими лише модерними\". Такі інтелектуальні вислови наносимо на мерч. Мені здається, це збагачує у просторі міста інтелектуальну присутність української культури", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "2025 — продовження", "source_id": "60b5354d"}, {"statement_id": "stmt_f0860420", "date": "2025-01-16", "quote": "Накипіло з Філіппом Диканем", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "2025 — продовження", "source_id": "60b5354d"}, {"statement_id": "stmt_c21be4e3", "date": "2025-09-09", "quote": "складнощі представлення [в Росії] українських культурних заходів, у зв'язку з такою непростою обстановкою [війною?]", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "2025 — продовження", "source_id": "281f1bee"}, {"statement_id": "stmt_9ac88106", "date": "2025-09-09", "quote": "Каллиграфия в церковном искусстве", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "2025 — продовження", "source_id": "281f1bee"}, {"statement_id": "stmt_7eccabe7", "date": "2025-09-09", "quote": "восстановление исторической справедливости", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "2025 — продовження", "source_id": "281f1bee"}, {"statement_id": "stmt_15905f59", "date": "2026-05-13", "quote": "Коментарів на Книгу Буття", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "2025 — продовження", "source_id": "82128700"}, {"statement_id": "stmt_d8d6f9c2", "date": "2026-05-13", "quote": "Днем Українського Шрифтаря", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "2025 — продовження", "source_id": "82128700"}, {"statement_id": "stmt_75a9c79b", "date": "2026-05-13", "quote": "буду лізти у всі щілини. І не важливо де ця ідея зверхнього панування живе: у голові російського зека в окопах на чужій землі, у голові програміста, що розраховує політ ракети по українським містам, чи у голові історика, що підтасовує історичні факти заради влади. Поки", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "2025 — продовження", "source_id": "82128700"}, {"statement_id": "stmt_3ec694eb", "date": "", "quote": "Давида Чичкана lvivart.center\n\n4 роки тому\n\nЛекція про чорні діри. Космічні монстри lvivart.center\n\n4 роки тому\n\nЛьвівський муніципальний дзен. З медитації немає користі lvivart.center\n\n4 роки тому\n\nSPIV BRATIV - Велике Інтерв'ю з", "summary": "[regex]", "platform": "other", "rhetoric_type": "unknown", "war_context": "", "source_id": "75cf9bde"}, {"statement_id": "stmt_df98c18a", "date": "", "quote": "Світло у темряві світить. Свідоцтво Російської Православної Церкви в роки радянських гонінь", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "", "source_id": "79eacac7"}, {"statement_id": "stmt_7ea1c7dc", "date": "", "quote": "По їхніх плодах ви пізнаєте їх. Хіба збирають виноград з тернини, або фіги із будяків?", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "", "source_id": "79eacac7"}, {"statement_id": "stmt_b001836c", "date": "", "quote": "Радійте тому, що імена ваші записані на небесах", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "", "source_id": "79eacac7"}, {"statement_id": "stmt_994443b0", "date": "", "quote": "Шкода, що ми не дуже часто втілюємо в наше життя ці досягнення. У нас є свій art and craft. У нас є Василь Кричевський, у нас є [Опанас] Сластьон. Ми сидимо поряд із Худпромом із чудовим українським модерном. Це частина нашого art and craft", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "", "source_id": "6631673a"}, {"statement_id": "stmt_9a27b0dc", "date": "", "quote": "Наприклад, із цитатами Юрія Шевельова: \"Ми світу будемо цікавими лише модерними\". Такі інтелектуальні вислови наносимо на мерч. Мені здається, це збагачує у просторі міста інтелектуальну присутність української культури", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "", "source_id": "6631673a"}, {"statement_id": "stmt_f20b4d90", "date": "", "quote": "Накипіло з Філіппом Диканем", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "", "source_id": "6631673a"}, {"statement_id": "stmt_b59f6c9d", "date": "", "quote": "Музею книги і друкарства України", "summary": "[regex]", "platform": "instagram", "rhetoric_type": "unknown", "war_context": "", "source_id": "38d841c3"}, {"statement_id": "stmt_cc948e2b", "date": "", "quote": "шрифтів та мистецтва того часу.", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "", "source_id": "ff6d019c"}, {"statement_id": "stmt_277068e4", "date": "", "quote": ", — розповів дизайнер.\n\n![](data:image/gif;base64,R0lGODlhAQABAAAAADs=)\n\nНовий дизайн Харківського драмтеатру. Зображення: Олексій Чекаль\n\nАкцентною фігурою дизайну є квітка. Її образ є динамічним та постійно змінюється", "summary": "[regex]", "platform": "bio", "rhetoric_type": "unknown", "war_context": "", "source_id": "ff6d019c"}, {"statement_id": "stmt_642dd780", "date": "", "quote": "Музею книги і друкарства України", "summary": "[regex]", "platform": "interview", "rhetoric_type": "unknown", "war_context": "", "source_id": "a70e583f"}, {"statement_id": "stmt_4b930012", "date": "", "quote": "Погляд за обрій. Літери, які говорять про свободу та віру", "summary": "[regex]", "platform": "interview", "rhetoric_type": "unknown", "war_context": "", "source_id": "a70e583f"}, {"statement_id": "stmt_09aa341b", "date": "", "quote": "Нова радість стала. Улюблені колядки та щедрівки", "summary": "[regex]", "platform": "interview", "rhetoric_type": "unknown", "war_context": "", "source_id": "a70e583f"}, {"statement_id": "stmt_ed84cdcf", "date": "", "quote": "Погляд за обрій: книжковий та сакральний дизайн Олексія Чекаля", "summary": "[regex]", "platform": "other", "rhetoric_type": "unknown", "war_context": "", "source_id": "164620f9"}, {"statement_id": "stmt_ac4a01e2", "date": "", "quote": "Погляд за обрій: книжковий та сакральний дизайн", "summary": "[regex]", "platform": "other", "rhetoric_type": "unknown", "war_context": "", "source_id": "164620f9"}, {"statement_id": "stmt_157dddbb", "date": "", "quote": "Click to copy this page's address to your clipboard", "summary": "[regex]", "platform": "other", "rhetoric_type": "unknown", "war_context": "", "source_id": "047de8e5"}, {"statement_id": "stmt_0af88681", "date": "", "quote": "did something fell from the sky", "summary": "[regex]", "platform": "other", "rhetoric_type": "unknown", "war_context": "", "source_id": "047de8e5"}];
+const _sourcesData    = [{"source_id": "fa1c8360", "source_type": "project", "title": "Oleksii Chekal - Behance", "url": "https://www.behance.net/PaLaMa?locale=en_US", "date_raw": ""}, {"source_id": "e64593a2", "source_type": "bio", "title": "Автор логотипу ПЦУ Чекаль про проєкт для правнучки Мони Лізи, «хіпі» в каліграфії і про те, що не так з гривнею", "url": "https://www.radiosvoboda.org/a/30444078.html", "date_raw": "2020-02-23T21:50:43.000Z"}, {"source_id": "67bb2ed1", "source_type": "interview", "title": "Олексій Чекаль: Естетика графічного спротиву та шрифт на службі національної й релігійної ідентичності | Інтерв'ю з України", "url": "https://rozmova.wordpress.com/2024/06/18/oleksiy-chekal-3/", "date_raw": "2024-06-18T18:30:00.000Z"}, {"source_id": "08a2e83f", "source_type": "other", "title": "Погляд за обрій: книжковий та сакральний дизайн Олексія Чекаля | Музей книги і друкарства України", "url": "https://www.mkdu.com.ua/pohliad-za-obrij/", "date_raw": "2023-12-15T18:35:46.000Z"}, {"source_id": "1763daa7", "source_type": "bio", "title": "Олексій Чекаль - Видавництво Старого Лева", "url": "https://starylev.com.ua/old-lion/author/oleksiy-cekal", "date_raw": ""}, {"source_id": "9ce4a9d2", "source_type": "interview", "title": "Олексій Чекаль про створення графічного стилю Православної церкви України", "url": "https://www.radiosvoboda.org/a/29904016.html", "date_raw": "2020-04-27T10:45:00.000Z"}, {"source_id": "929c5b3a", "source_type": "bio", "title": "\"Бог існує там, де того хоче. Напевно, донедавна був у підвалах Азовсталі\", — Олексій Чекаль, автор графічного стилю для ПЦУ - РІСУ", "url": "https://risu.ua/bog-isnuye-tam-de-togo-hoche-napevno-donedavna-buv-u-pidvalah-azovstali--oleksij-chekal-avtor-grafichnogo-stilyu-dlya-pcu_n129579", "date_raw": "2022-05-26T08:40:00.000Z"}, {"source_id": "60b5354d", "source_type": "bio", "title": "дизайнер і каліграф Олексій Чекаль - Радіо «Накипіло", "url": "https://radio.nakypilo.ua/stvoryuyemo-modu-na-znahidky-ukrayinskyh-mytcziv-dyzajner-i-kaligraf-oleksij-chekal/", "date_raw": "2025-01-16T10:02:23.000Z"}, {"source_id": "75cf9bde", "source_type": "other", "title": "Лекція про виникнення кириличної писемності Олексія Чекаля / ТиДиви", "url": "https://tydyvy.com/video/DyklGmE", "date_raw": ""}, {"source_id": "281f1bee", "source_type": "bio", "title": "Чекаль Олексій Георгійович - Вікіцитати", "url": "https://uk.wikiquote.org/wiki/%D0%A7%D0%B5%D0%BA%D0%B0%D0%BB%D1%8C_%D0%9E%D0%BB%D0%B5%D0%BA%D1%81%D1%96%D0%B9_%D0%93%D0%B5%D0%BE%D1%80%D0%B3%D1%96%D0%B9%D0%BE%D0%B2%D0%B8%D1%87", "date_raw": "2025-09-09T22:39:26.000Z"}, {"source_id": "4ba440ef", "source_type": "other", "title": "Олексій Чекаль \"Літери та сенси\" - Львівська Національна Академія Мистецтв", "url": "https://lnam.edu.ua/uk/event/oleksij-chekal-literi-ta-sensi.html", "date_raw": ""}, {"source_id": "7e07f99e", "source_type": "bio", "title": "У Харкові відбудеться лекція дизайнера Олексія Чекаля", "url": "https://lyuk.media/news/lecture-from-chekal/", "date_raw": "2025-01-14T09:23:56.000Z"}, {"source_id": "79eacac7", "source_type": "bio", "title": "Каліграфія в Церкві, або Про битву зі смислами, управлінні словами і вихвалянні імені Божого | Православ'я і світ", "url": "https://muzruk.if.ua/info/kaligrafia/uk/bukva-kaligrafia-v-cerkvi-abo-pro-bitvu-zi-smislami-upravlinni-slovami-i-vihvalanni-imeni-bozogo/", "date_raw": ""}, {"source_id": "e924bca7", "source_type": "interview", "title": "Лекція Олексія Чекаля «Алфавіт світу або розмова про зустрічі з літерами, книгами» | Педагогічний музей України", "url": "https://pmu.in.ua/museum_pedagogics/alpfavit/", "date_raw": "2022-11-07T17:21:38.000Z"}, {"source_id": "7ab98fb4", "source_type": "other", "title": "Олексій Чекаль – Погляд за обрій: літери, які говорять - YouTube", "url": "https://www.youtube.com/watch?v=YzZ9_UrEb5w", "date_raw": ""}, {"source_id": "2f34483b", "source_type": "social", "title": "calligraphy, design, typo (@oleksiy_chekal) - Instagram", "url": "https://www.instagram.com/oleksiy_chekal?hl=en", "date_raw": ""}, {"source_id": "6631673a", "source_type": "bio", "title": "дизайнер і каліграф Олексій Чекаль - Радіо «Накипіло", "url": "https://radio.nakypilo.ua/stvoryuyemo-modu-na-znahidky-ukrayinskyh-mytcziv-dyzajner-i-kaligraf-oleksij-chekal", "date_raw": ""}, {"source_id": "601f0cd8", "source_type": "other", "title": "[PDF] ОЛЕКСІЙ ЧЕКАЛЬ: ЛІТЕРИ І СЕНСИ", "url": "https://repository.ac.kharkov.ua/bitstreams/a904aad9-0b9c-487f-b4e1-9a485f19418b/download", "date_raw": ""}, {"source_id": "38d841c3", "source_type": "bio", "title": "Олексій Чекаль — дизайнер, типограф, каліграф ... - Instagram", "url": "https://www.instagram.com/p/DNnvGeRM0rX", "date_raw": ""}, {"source_id": "bb8919d7", "source_type": "bio", "title": "Олексій Чекаль: літери і сенси - ResearchGate", "url": "https://www.researchgate.net/publication/391571537_Oleksij_Cekal_literi_i_sensi", "date_raw": ""}, {"source_id": "db85ed67", "source_type": "bio", "title": "Про дизайн та дизайнерів. Інтерв'ю з Олексієм Чекалем - CASES", "url": "https://cases.media/article/pro-dizain-i-dizaineriv", "date_raw": "2021-09-13T08:05:00.000Z"}, {"source_id": "9f234e45", "source_type": "news", "title": "Алексей Чекаль: «Современный человек устал от компьютерной эстетики»", "url": "https://web.archive.org/web/20220706221538/https:/2day.kh.ua/ru/news/aleksey-chekal-sovremennyy-chelovek-ustal-ot-kompyuternoy-estetiki", "date_raw": "2018-09-30T16:27:21.000Z"}, {"source_id": "37ef9e85", "source_type": "bio", "title": "Дизайнер Олексій Чекаль розробив новий дизайн для ...", "url": "https://pragmatika.media/news/dyzajner-oleksij-chekal-rozrobyv-novyj-dyzajn-dlia-kharkivskoho-dramteatru/", "date_raw": "2024-10-29T08:47:36.000Z"}, {"source_id": "ff6d019c", "source_type": "bio", "title": "Дизайнер Олексій Чекаль розробив новий дизайн для ...", "url": "https://pragmatika.media/news/dyzajner-oleksij-chekal-rozrobyv-novyj-dyzajn-dlia-kharkivskoho-dramteatru", "date_raw": ""}, {"source_id": "a70e583f", "source_type": "interview", "title": "Олексій Чекаль: Естетика графічного спротиву та шрифт на ...", "url": "https://rozmova.wordpress.com/2024/06/18/oleksiy-chekal-3", "date_raw": ""}, {"source_id": "68b89840", "source_type": "news", "title": "View of Oleksiy Chekal: Letters and Meanings - HUDPROM", "url": "https://hudprom.org.ua/hp/article/view/49/109", "date_raw": ""}, {"source_id": "bd7b7d26", "source_type": "project", "title": "Ми з тобою однієї крові — Bird In Flight", "url": "https://birdinflight.com/nathnennya-2/project-uk/20220927-mi-z-toboyu-odniyeyi-krovi-chekachkov.html", "date_raw": "2022-09-27T05:58:15.000Z"}, {"source_id": "164620f9", "source_type": "other", "title": "Погляд за обрій: книжковий та сакральний дизайн Олексія Чекаля", "url": "https://www.mkdu.com.ua/pohliad-za-obrij", "date_raw": ""}, {"source_id": "e636430e", "source_type": "interview", "title": "Aesthetics of Graphic Resistance and Typeface in the Service of National and Religious Identity - RISU", "url": "https://risu.ua/en/aesthetics-of-graphic-resistance-and-typeface-in-the-service-of-national-and-religious-identity_n149288", "date_raw": "2024-06-29T13:20:00.000Z"}, {"source_id": "a0fed800", "source_type": "other", "title": "Oleksiy Chekal: The Multilingual Calligraphic Artist of Ukraine", "url": "https://www.linkedin.com/pulse/more-story-multilingual-calligraphy-oleksiy-chekal-gracen-farrell", "date_raw": "2022-06-27T19:14:35.000Z"}, {"source_id": "d025e2e1", "source_type": "interview", "title": "Multilingual Calligraphic Artist of Ukraine (Interview) - Behance", "url": "https://www.behance.net/gallery/146739317/Multilingual-Calligraphic-Artist-of-Ukraine-(Interview)", "date_raw": "2022-08-28T00:00:00.000Z"}, {"source_id": "82128700", "source_type": "bio", "title": "oleksii chekal | Graphic Designer, Master Calligrapher, Art Historian, Professor In Florence Classical Arts Academy", "url": "https://linkedin.com/in/oleksii-chekal-48a73722", "date_raw": "2026-05-13T18:48:22.000Z"}, {"source_id": "a1798dc9", "source_type": "project", "title": "Flowering Cyrillic or the Genesis of the Ukrainian Typography | cooperedu", "url": "https://cooper.edu/events-and-exhibitions/events/flowering-cyrillic-or-genesis-ukrainian-typography", "date_raw": ""}, {"source_id": "4bd50e0b", "source_type": "news", "title": "Oleksiy Chekal: Letters and Meanings - HUDPROM", "url": "https://hudprom.org.ua/index.php/hp/article/view/49", "date_raw": "2024-08-29T00:00:00.000Z"}, {"source_id": "9bacd322", "source_type": "bio", "title": "Oleksii Chekal - Independent Researcher", "url": "https://independent.academia.edu/OleksiyChekal", "date_raw": "2011-01-19T15:10:42.000Z"}, {"source_id": "b3b51ce0", "source_type": "other", "title": "Oleksii Chekal", "url": "https://luc.devroye.org/fonts-93530.html", "date_raw": ""}, {"source_id": "6d771f04", "source_type": "bio", "title": "Description: Олексій Чекаль :: NVK CVTI SR", "url": "https://ersearch2.cvtisr.sk/vufind/EdsRecord/edsdoj,edsdoj.3752ebb12d124a52a685f5cb0a5b5698", "date_raw": ""}, {"source_id": "62386dbb", "source_type": "other", "title": "Oleksii Chekal - TypoLub - Teatr NN", "url": "https://teatrnn.pl/typolub/oleksii-chekal/", "date_raw": ""}, {"source_id": "3e9e6812", "source_type": "other", "title": "The Daily Heller: Graphic Design and the Fog of War", "url": "https://www.printmag.com/daily-heller/the-daily-heller-design-through-the-fog-of-war/", "date_raw": "2023-06-29T11:00:00.000Z"}, {"source_id": "f2dc7ebc", "source_type": "other", "title": "Oleksiy Chekal - Florence Classical Arts Academy", "url": "https://www.artac.org/oleksiy-chekal", "date_raw": ""}, {"source_id": "b6da2a8c", "source_type": "other", "title": "Oleksiy Chekal, the Multilingual Calligraphic Artist of Ukraine", "url": "https://multilingual.com/issues/june-2022/oleksiy-chekal", "date_raw": ""}, {"source_id": "63966246", "source_type": "project", "title": "Oleksiy Chekal | Dribbble", "url": "https://dribbble.com/oleksiychekal", "date_raw": ""}, {"source_id": "047de8e5", "source_type": "other", "title": "The Daily Heller: Graphic Design and the Fog of War", "url": "https://www.printmag.com/daily-heller/the-daily-heller-design-through-the-fog-of-war", "date_raw": ""}, {"source_id": "6446e346", "source_type": "other", "title": "Каллиграфия в Церкви, или О битве со смыслами, управлении словами и восхвалении имени Божьего | Правмир", "url": "https://www.pravmir.ru/kalligrafiya-v-tserkvi-ili-o-bitve-so-smyislami-upravlenii-slovami-i-voshvalenii-imeni-bozhego/", "date_raw": "2013-01-22T05:00:01.000Z"}];
+
+/* ── Filter ── */
+function filterStmts(type, btn) {
+  const rows = document.querySelectorAll('#stmts-tbody tr');
+  let visible = 0;
+  rows.forEach(row => {
+    const show = type === 'all' || row.dataset.rt === type;
+    row.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  if (btn) {
+    btn.classList.add('active');
+  } else {
+    // called from rcount badge in summary — activate matching fbtn
+    const match = document.querySelector('.fbtn-' + type);
+    if (match) match.classList.add('active');
+  }
+  const counter = document.getElementById('stmts-counter');
+  if (counter) counter.textContent = type === 'all' ? '' : `(${visible} з ${rows.length})`;
+}
+
+/* ── Export helpers ── */
+function _toCSV(data, keys) {
+  if (!data.length) return keys.join(',') + '\n';
+  const esc = v => JSON.stringify(v == null ? '' : String(v));
+  return [keys.join(','), ...data.map(r => keys.map(k => esc(r[k])).join(','))].join('\n');
+}
+
+function _download(content, filename, mime) {
+  const blob = new Blob(['﻿' + content], { type: mime + ';charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 150);
+}
+
+function exportCSV(type) {
+  if (type === 'statements') {
+    _download(
+      _toCSV(_statementsData, ['date','rhetoric_type','platform','war_context','quote','summary','source_id']),
+      'statements.csv', 'text/csv'
+    );
+  } else {
+    _download(
+      _toCSV(_sourcesData, ['source_type','title','url','date_raw']),
+      'sources.csv', 'text/csv'
+    );
+  }
+}
+
+function exportJSON() {
+  const payload = {
+    seed: "Олексій Чекаль",
+    actor_id: "2c5a0fd1",
+    generated_at: new Date().toISOString(),
+    statements: _statementsData,
+    sources: _sourcesData,
+  };
+  _download(JSON.stringify(payload, null, 2), 'osint_report.json', 'application/json');
+}
+</script>
+
+</body>
+</html>

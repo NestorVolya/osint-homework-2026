@@ -1,0 +1,43 @@
+name: embed
+version: 0.1.0
+description: Document embeddings and vector operations
+entry_point: arkham_shard_embed:EmbedShard
+api_prefix: /api/embed
+requires_frame: ">=0.1.0"
+
+navigation:
+  category: Search
+  order: 25
+  icon: Binary
+  label: Embeddings
+  route: /embed
+
+dependencies:
+  services:
+    - vectors
+    - workers
+    - events
+  optional:
+    - documents
+  shards: []
+
+capabilities:
+  - embedding_generation
+  - similarity_search
+  - background_processing
+  - gpu_acceleration
+
+events:
+  publishes:
+    - embed.embedding.created
+    - embed.batch.completed
+    - embed.model.loaded
+  subscribes:
+    - document.ingested
+    - document.processed
+
+state:
+  strategy: none
+
+ui:
+  has_custom_ui: false

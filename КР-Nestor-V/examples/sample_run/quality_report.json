@@ -1,0 +1,90 @@
+{
+  "_profile_id": "ua_cultural_ru_sphere",
+  "metrics": {
+    "source_count": 44,
+    "unique_domains": 34,
+    "source_diversity": 0.7727,
+    "type_entropy": 0.7662,
+    "type_counts": {
+      "project": 4,
+      "bio": 16,
+      "interview": 6,
+      "other": 14,
+      "social": 1,
+      "news": 3
+    },
+    "text_coverage": 0.8182,
+    "shallow_ratio": 0.0227,
+    "median_text_length": 2824,
+    "archive_ratio": 0.0227,
+    "date_coverage": 0.4773,
+    "ru_domain_ratio": 0.0227,
+    "rhetoric_risk_ratio": 0.0,
+    "risk_flag_ratio": 0.2034,
+    "duplicate_ratio": 0.0,
+    "rejected_ratio": 0.3359,
+    "fetch_success_rate": 1.0,
+    "fetched_total": 128,
+    "total_statements": 65,
+    "total_links": 295,
+    "telegram_count": 0,
+    "vk_ok_count": 0
+  },
+  "quality_gates": {
+    "coverage_diversity": {
+      "status": "PASS",
+      "score": 1.0,
+      "triggered_by": [],
+      "summary": "coverage_diversity: PASS"
+    },
+    "depth_noise": {
+      "status": "PASS",
+      "score": 1.0,
+      "triggered_by": [],
+      "summary": "depth_noise: PASS"
+    },
+    "archive_temporal": {
+      "status": "PASS",
+      "score": 1.0,
+      "triggered_by": [],
+      "summary": "archive_temporal: PASS"
+    },
+    "risk_signal": {
+      "status": "PASS",
+      "score": 1.0,
+      "triggered_by": [],
+      "summary": "risk_signal: PASS"
+    },
+    "technical": {
+      "status": "PASS",
+      "score": 1.0,
+      "triggered_by": [],
+      "summary": "technical: PASS"
+    }
+  },
+  "corpus_health_score": 1.0,
+  "quant_support": "strong",
+  "auto_diagnostics": "Корпус відповідає базовим структурним вимогам.",
+  "temporal_gaps": [
+    {
+      "from": "2011-01",
+      "to": "2013-01",
+      "months": 24
+    },
+    {
+      "from": "2013-01",
+      "to": "2018-09",
+      "months": 68
+    },
+    {
+      "from": "2018-09",
+      "to": "2020-02",
+      "months": 17
+    },
+    {
+      "from": "2020-04",
+      "to": "2021-09",
+      "months": 17
+    }
+  ]
+}

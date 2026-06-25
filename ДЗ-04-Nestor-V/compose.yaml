@@ -1,0 +1,51 @@
+services:
+
+  worker-html:
+    build: .
+    command: python src/worker_html.py
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "8000:8000"
+    restart: on-failure
+
+  worker-js:
+    build: .
+    command: python src/worker_js.py
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "8001:8000"
+    depends_on:
+      - worker-html
+    restart: on-failure
+
+  scheduler:
+    build: .
+    command: python src/scheduler.py
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - worker-html
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - worker-html
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+    depends_on:
+      - prometheus
+    restart: unless-stopped

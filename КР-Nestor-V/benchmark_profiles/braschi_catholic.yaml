@@ -1,0 +1,36 @@
+schema_version: "1.0.0"
+profile_id: braschi_catholic
+description: "KR actor: Francesco Braschi — Catholic priest, theologian, RU/EU sphere"
+actor_types: [academic, cultural, unknown]
+
+context:
+  country_context: IT
+  language_context: [it, ru, en]
+  # query_context: terms appended to each search query to disambiguate same-name actors.
+  # Use when seed name is shared with an unrelated public figure (athlete, politician, etc.)
+  query_context:
+    - "Russia Cristiana"
+    - "Catholic"
+    - "Ambrosiana"
+    - "theologian"
+    - "священник"
+    - "богослов"
+
+thresholds:
+  source_diversity:      {pass_min: 0.40, warn_min: 0.25}
+  type_entropy:          {pass_min: 0.40, warn_min: 0.25}
+  text_coverage:         {pass_min: 0.60, warn_min: 0.40}
+  median_text_length:    {pass_min: 300,  warn_min: 150}
+  shallow_ratio:         {pass_max: 0.25, warn_max: 0.40}
+  archive_ratio:         {pass_max: 0.50, warn_max: 0.70}
+  date_coverage:         {pass_min: 0.25, warn_min: 0.10}
+  ru_domain_ratio:       {pass_max: 0.60, warn_max: 0.75}
+  rhetoric_risk_ratio:   {pass_max: 0.35, warn_max: 0.55}
+  duplicate_ratio:       {pass_max: 0.15, warn_max: 0.30}
+
+weights:
+  coverage_diversity: 0.25
+  depth_noise:        0.25
+  risk_signal:        0.20
+  archive_temporal:   0.15
+  technical:          0.15

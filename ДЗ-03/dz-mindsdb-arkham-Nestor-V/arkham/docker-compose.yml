@@ -1,0 +1,105 @@
+# =============================================================================
+# SHATTERED KANDOR: Docker Compose
+# Works for both local development and VPS deployment
+#
+# Architecture: PostgreSQL-only (pgvector for vectors, SKIP LOCKED for jobs)
+# No Redis or Qdrant dependencies
+#
+# Usage:
+#   docker compose up -d              # Start all services
+#   docker compose logs -f app        # View app logs
+#   docker compose down                # Stop all services
+#   docker compose down -v             # Stop and remove volumes (DELETES DATA)
+# =============================================================================
+
+name: shattered
+
+services:
+  # ---------------------------------------------------------------------------
+  # Main Application (Frame + Shards + Shell UI)
+  # ---------------------------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: shattered:local
+    container_name: shattered-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8100}:8100"
+    environment:
+      # Database connection (includes pgvector for vectors and job queue)
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-arkham}:${POSTGRES_PASSWORD:-arkhampass}@postgres:5432/${POSTGRES_DB:-arkhamdb}
+      # LLM endpoint (optional - works without it)
+      - LLM_ENDPOINT=${LLM_ENDPOINT:-}
+      - LM_STUDIO_URL=${LM_STUDIO_URL:-}
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      # VLM endpoint for OCR shard (optional)
+      - VLM_ENDPOINT=${VLM_ENDPOINT:-}
+      # Embedding model (optional - enables semantic search)
+      # Recommended: BAAI/bge-m3 (1024 dims, ~2.2GB, high quality)
+      # Lightweight: all-MiniLM-L6-v2 (384 dims, ~80MB, fast)
+      # WARNING: Once set, changing models requires rebuilding vector collections
+      - EMBED_MODEL=${EMBED_MODEL:-all-MiniLM-L6-v2}
+      # Serve the React shell from FastAPI
+      - ARKHAM_SERVE_SHELL=true
+      # Auth security (REQUIRED for production - generate with: openssl rand -hex 32)
+      - AUTH_SECRET_KEY=${AUTH_SECRET_KEY:-CHANGE-ME-IN-PRODUCTION}
+      - JWT_LIFETIME_SECONDS=${JWT_LIFETIME_SECONDS:-3600}
+    volumes:
+      # Persist uploaded documents and exports
+      - datasilo:/app/data_silo
+      # Optional: mount config file for shard selection
+      - ./config/shattered.yaml:/app/config/shattered.yaml:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - shattered-net
+    # For connecting to LLM on host machine (LM Studio, Ollama, etc)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database with pgvector
+  # Handles: structured data, vector embeddings, job queue, rate limiting
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: shattered-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-arkham}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-arkhampass}
+      - POSTGRES_DB=${POSTGRES_DB:-arkhamdb}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Run migration on first start
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-arkham} -d ${POSTGRES_DB:-arkhamdb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - shattered-net
+    # Expose for local development (Python running on host)
+    ports:
+      - "5433:5432"
+
+# -----------------------------------------------------------------------------
+# Volumes (Persistent Data)
+# -----------------------------------------------------------------------------
+volumes:
+  postgres_data:
+    name: shattered_postgres_data
+  datasilo:
+    name: shattered_datasilo
+
+# -----------------------------------------------------------------------------
+# Network
+# -----------------------------------------------------------------------------
+networks:
+  shattered-net:
+    name: shattered-network
+    driver: bridge

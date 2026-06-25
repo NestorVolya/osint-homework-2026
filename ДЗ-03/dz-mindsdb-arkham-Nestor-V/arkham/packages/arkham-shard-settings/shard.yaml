@@ -1,0 +1,142 @@
+# Settings Shard - Production Manifest v1.0
+# Compliant with shard_manifest_schema_prod.md
+# Application settings and configuration management
+
+name: settings
+version: "0.1.0"
+description: Application settings and configuration management - controls system behavior, user preferences, and shard configurations
+entry_point: arkham_shard_settings:SettingsShard
+api_prefix: /api/settings
+requires_frame: ">=0.1.0"
+
+navigation:
+  category: System
+  order: 5
+  icon: Settings
+  label: Settings
+  route: /settings
+  badge_endpoint: null
+  badge_type: null
+  sub_routes:
+    - id: general
+      label: General
+      route: /settings
+      icon: Sliders
+    - id: appearance
+      label: Appearance
+      route: /settings/appearance
+      icon: Palette
+    - id: notifications
+      label: Notifications
+      route: /settings/notifications
+      icon: Bell
+    - id: performance
+      label: Performance
+      route: /settings/performance
+      icon: Zap
+    - id: data
+      label: Data
+      route: /settings/data
+      icon: Database
+    - id: advanced
+      label: Advanced
+      route: /settings/advanced
+      icon: Wrench
+    - id: shards
+      label: Shards
+      route: /settings/shards
+      icon: Puzzle
+
+dependencies:
+  services:
+    - database
+    - events
+  optional:
+    - storage
+  shards: []
+
+capabilities:
+  - system_settings
+  - user_preferences
+  - shard_configuration
+  - settings_export
+  - settings_import
+
+events:
+  publishes:
+    - settings.setting.updated
+    - settings.setting.reset
+    - settings.category.updated
+    - settings.profile.applied
+    - settings.backup.created
+    - settings.backup.restored
+  subscribes:
+    - shard.registered
+    - shard.unregistered
+
+state:
+  strategy: url
+  url_params:
+    - category
+    - search
+  local_keys:
+    - collapsed_sections
+    - show_advanced
+    - last_category
+
+ui:
+  has_custom_ui: true
+  id_field: key
+  selectable: false
+  list_endpoint: /
+  detail_endpoint: /{key}
+  list_filters:
+    - name: search
+      type: search
+      label: Search settings
+      param: search
+    - name: category
+      type: select
+      label: Category
+      param: category
+      options:
+        - value: general
+          label: General
+        - value: appearance
+          label: Appearance
+        - value: notifications
+          label: Notifications
+        - value: performance
+          label: Performance
+        - value: data
+          label: Data
+        - value: advanced
+          label: Advanced
+        - value: shards
+          label: Shards
+  list_columns:
+    - field: key
+      label: Setting
+      type: text
+      sortable: true
+    - field: value
+      label: Value
+      type: text
+    - field: category
+      label: Category
+      type: badge
+    - field: is_modified
+      label: Modified
+      type: boolean
+  row_actions:
+    - label: Edit
+      type: link
+      route: /settings/{key}
+      icon: Edit
+    - label: Reset
+      type: api
+      endpoint: /{key}
+      method: DELETE
+      confirm: true
+      confirm_message: Reset this setting to its default value?
+      icon: RotateCcw

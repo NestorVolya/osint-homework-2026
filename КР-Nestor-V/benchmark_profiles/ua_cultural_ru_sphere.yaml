@@ -1,0 +1,27 @@
+schema_version: "1.0.0"
+profile_id: ua_cultural_ru_sphere
+description: "KR actor: cultural figure with RU-sphere ties (calligraphers, artists, clergy)"
+actor_types: [academic, cultural, unknown]
+
+context:
+  country_context: UA
+  language_context: [uk, ru, en, it]
+
+thresholds:
+  source_diversity:      {pass_min: 0.40, warn_min: 0.25}
+  type_entropy:          {pass_min: 0.40, warn_min: 0.25}
+  text_coverage:         {pass_min: 0.60, warn_min: 0.40}
+  median_text_length:    {pass_min: 300,  warn_min: 150}
+  shallow_ratio:         {pass_max: 0.25, warn_max: 0.40}
+  archive_ratio:         {pass_max: 0.50, warn_max: 0.70}
+  date_coverage:         {pass_min: 0.25, warn_min: 0.10}
+  ru_domain_ratio:       {pass_max: 0.60, warn_max: 0.75}
+  rhetoric_risk_ratio:   {pass_max: 0.35, warn_max: 0.55}
+  duplicate_ratio:       {pass_max: 0.15, warn_max: 0.30}
+
+weights:
+  coverage_diversity: 0.25
+  depth_noise:        0.25
+  risk_signal:        0.20
+  archive_temporal:   0.15
+  technical:          0.15

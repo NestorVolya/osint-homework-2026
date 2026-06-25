@@ -1,0 +1,27 @@
+schema_version: "1.0.0"
+profile_id: default
+description: Universal thresholds for public figures (politicians, journalists, activists)
+actor_types: [politician, journalist, activist, academic, unknown]
+
+context:
+  country_context: UA
+  language_context: [uk, en, ru]
+
+thresholds:
+  source_diversity:      {pass_min: 0.55, warn_min: 0.35}
+  type_entropy:          {pass_min: 0.50, warn_min: 0.30}
+  text_coverage:         {pass_min: 0.65, warn_min: 0.45}
+  median_text_length:    {pass_min: 400,  warn_min: 200}
+  shallow_ratio:         {pass_max: 0.20, warn_max: 0.35}
+  archive_ratio:         {pass_max: 0.40, warn_max: 0.60}
+  date_coverage:         {pass_min: 0.35, warn_min: 0.15}
+  ru_domain_ratio:       {pass_max: 0.20, warn_max: 0.40}
+  rhetoric_risk_ratio:   {pass_max: 0.20, warn_max: 0.45}
+  duplicate_ratio:       {pass_max: 0.10, warn_max: 0.25}
+
+weights:
+  coverage_diversity: 0.25
+  depth_noise:        0.25
+  risk_signal:        0.20
+  archive_temporal:   0.15
+  technical:          0.15

@@ -1,0 +1,33 @@
+id,full_name,alias,country,position,entity_type,sanction_list,listed_date,status,notes
+1,Vladimir Putin,Putin V.,Russia,President of Russia,PEP,EU-consolidated,2022-02-25,active,Head of state
+2,Sergei Lavrov,Lavrov S.,Russia,Minister of Foreign Affairs,PEP,EU-consolidated,2022-02-25,active,Foreign minister
+3,Nikolai Patrushev,Patrushev N.,Russia,Security Council Secretary,PEP,US-OFAC,2022-03-11,active,Security official
+4,Igor Sechin,Sechin I.,Russia,CEO Rosneft,PEP,EU-consolidated,2014-07-31,active,State energy sector
+5,Gennady Timchenko,Timchenko G.,Russia,Volga Group owner,ENTITY,EU-consolidated,2014-03-21,active,Oligarch
+6,Arkady Rotenberg,Rotenberg A.,Russia,Businessman,ENTITY,US-OFAC,2014-03-20,active,Close associate of Putin
+7,Boris Rotenberg,Rotenberg B.,Russia,Businessman,ENTITY,US-OFAC,2014-03-20,active,Close associate of Putin
+8,Alexander Lukashenko,Lukashenko A.,Belarus,President of Belarus,PEP,EU-consolidated,2020-10-02,active,Head of state
+9,Viktor Lukashenko,Lukashenko V.,Belarus,National Security Advisor,PEP,EU-consolidated,2020-10-02,active,Son of president
+10,Roman Abramovich,Abramovich R.,Russia,Businessman,ENTITY,UK-sanctions,2022-03-10,active,Oligarch
+11,Alisher Usmanov,Usmanov A.,Russia,USM Holdings owner,ENTITY,EU-consolidated,2022-02-28,active,Oligarch
+12,Mikhail Fridman,Fridman M.,Russia,Alfa Group founder,ENTITY,EU-consolidated,2022-02-28,active,Oligarch
+13,Petr Aven,Aven P.,Russia,Alfa Bank chairman,ENTITY,EU-consolidated,2022-02-28,active,Oligarch
+14,Alexei Mordashov,Mordashov A.,Russia,Severstal owner,ENTITY,EU-consolidated,2022-02-28,active,Oligarch
+15,Andrey Kostin,Kostin A.,Russia,VTB Bank CEO,PEP,EU-consolidated,2022-02-28,active,State bank executive
+16,German Gref,Gref G.,Russia,Sberbank CEO,PEP,EU-consolidated,2022-03-28,active,State bank executive
+17,Ramzan Kadyrov,Kadyrov R.,Russia,Head of Chechnya,PEP,US-OFAC,2017-12-20,active,Regional head
+18,Yevgeny Prigozhin,Prigozhin Y.,Russia,Wagner Group founder,ENTITY,US-OFAC,2018-09-28,active,Deceased 2023
+19,Dmitry Medvedev,Medvedev D.,Russia,Security Council Deputy Chair,PEP,EU-consolidated,2022-10-06,active,Former president
+20,Sergei Shoigu,Shoigu S.,Russia,Former Defense Minister,PEP,EU-consolidated,2022-02-25,active,Military official
+21,Valery Gerasimov,Gerasimov V.,Russia,Chief of General Staff,PEP,EU-consolidated,2022-02-25,active,Military official
+22,Viktor Yanukovych,Yanukovych V.,Ukraine,Former President,PEP,EU-consolidated,2014-03-06,active,Fled to Russia 2014
+23,Mykola Azarov,Azarov M.,Ukraine,Former Prime Minister,PEP,EU-consolidated,2014-03-06,active,Fled to Russia 2014
+24,Oleh Deripaska,Deripaska O.,Russia,EN+ Group founder,ENTITY,US-OFAC,2018-04-06,active,Oligarch
+25,Suleiman Kerimov,Kerimov S.,Russia,Senator Dagestan,PEP,EU-consolidated,2022-02-28,active,Senator/businessman
+26,Nikolai Tokarev,Tokarev N.,Russia,Transneft CEO,PEP,EU-consolidated,2022-03-28,active,State energy sector
+27,Kirill Shamalov,Shamalov K.,Russia,Businessman,ENTITY,US-OFAC,2018-04-06,active,Former son-in-law of Putin
+28,Sergei Chemezov,Chemezov S.,Russia,Rostec CEO,PEP,EU-consolidated,2014-07-31,active,State industrial sector
+29,Alexander Bastrykin,Bastrykin A.,Russia,Investigative Committee Chair,PEP,EU-consolidated,2022-04-08,active,Law enforcement
+30,Vladimir Solovyov,Solovyov V.,Russia,State TV propagandist,PEP,EU-consolidated,2022-02-25,active,Media propagandist
+31,Margarita Simonyan,Simonyan M.,Russia,RT editor-in-chief,PEP,EU-consolidated,2022-03-09,active,Media propagandist
+32,Dmitry Kiselyov,Kiselyov D.,Russia,Rossiya Segodnya head,PEP,EU-consolidated,2014-03-21,active,Media propagandist

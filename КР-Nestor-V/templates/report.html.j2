@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title>OSINT Report — {{ seed }}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 1.5rem 2rem; color: #1a1a1a; background: #f0f2f5; }
+    h1 { color: #b91c1c; margin: 0 0 0.2rem; font-size: 1.6rem; }
+    h2 { border-bottom: 2px solid #e5e7eb; padding-bottom: 4px; margin: 2rem 0 0.5rem; font-size: 1.1rem; }
+    table { border-collapse: collapse; width: 100%; margin-top: 0.5rem; font-size: 0.86rem; background: #fff; border-radius: 6px; overflow: hidden; }
+    th { background: #f3f4f6; text-align: left; padding: 7px 10px; border: 1px solid #d1d5db; font-size: 0.8rem; white-space: nowrap; }
+    td { padding: 5px 10px; border: 1px solid #e5e7eb; vertical-align: top; }
+    tr:nth-child(even) { background: #f9fafb; }
+    a { color: #2563eb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .war-ctx { color: #6b7280; font-size: 0.78rem; }
+    .flag-risk { color: #dc2626; font-weight: 600; }
+    .empty { color: #9ca3af; font-style: italic; padding: 0.5rem 0; }
+    code { font-size: 0.82rem; background: #f3f4f6; padding: 1px 5px; border-radius: 3px; }
+
+    /* ── Summary card ── */
+    .summary-card {
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+      padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    }
+    .stats-row { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #f3f4f6; }
+    .stat { text-align: center; min-width: 70px; }
+    .stat-num { font-size: 2rem; font-weight: 700; line-height: 1; color: #111; }
+    .stat-lbl { font-size: 0.72rem; color: #6b7280; margin-top: 3px; text-transform: uppercase; letter-spacing: .03em; }
+    .section-label { font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 0.4rem; }
+    .rhetoric-row { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .rcount { padding: 3px 10px; border-radius: 12px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; }
+    .rcount:hover { opacity: 0.8; }
+    .risk-block { margin-bottom: 1rem; }
+    .risk-list { margin: 0.3rem 0 0; padding: 0 0 0 1.2rem; font-size: 0.84rem; line-height: 1.7; }
+    .export-row { display: flex; gap: 0.5rem; flex-wrap: wrap; padding-top: 0.75rem; border-top: 1px solid #f3f4f6; }
+    .btn {
+      padding: 5px 13px; border: 1px solid #d1d5db; border-radius: 5px;
+      cursor: pointer; font-size: 0.82rem; background: #fff; color: #374151;
+    }
+    .btn:hover { background: #f3f4f6; border-color: #9ca3af; }
+    .btn-primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+    .btn-primary:hover { background: #1e40af; }
+
+    /* ── Rhetoric type badges ── */
+    .rt-pro-ukrainian   { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+    .rt-pro-russian     { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+    .rt-bridge-building { background: #fef9c3; color: #854d0e; padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+    .rt-ambiguous       { background: #fde8d0; color: #9a3412; padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+    .rt-neutral         { background: #f3f4f6; color: #374151; padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+    .rt-unknown         { background: #f3f4f6; color: #9ca3af; padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+
+    /* ── Filter bar ── */
+    .filter-bar { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; margin-bottom: 0.75rem; }
+    .filter-bar .flbl { font-size: 0.78rem; color: #6b7280; margin-right: 0.15rem; }
+    .fbtn {
+      padding: 3px 11px; border: 1.5px solid #d1d5db; border-radius: 12px;
+      cursor: pointer; font-size: 0.78rem; background: #fff; color: #374151;
+      transition: all .12s;
+    }
+    .fbtn:hover { border-color: #9ca3af; background: #f3f4f6; }
+    .fbtn.active { font-weight: 700; }
+    .fbtn-all.active          { border-color: #374151; background: #374151; color: #fff; }
+    .fbtn-pro-ukrainian.active  { border-color: #16a34a; background: #dcfce7; color: #166534; }
+    .fbtn-pro-russian.active    { border-color: #dc2626; background: #fee2e2; color: #991b1b; }
+    .fbtn-bridge-building.active { border-color: #d97706; background: #fef9c3; color: #854d0e; }
+    .fbtn-ambiguous.active      { border-color: #ea580c; background: #fde8d0; color: #9a3412; }
+    .fbtn-neutral.active        { border-color: #6b7280; background: #f3f4f6; color: #374151; }
+    .fbtn-unknown.active        { border-color: #d1d5db; background: #f9fafb; color: #9ca3af; }
+
+    .hidden { display: none !important; }
+    #stmts-counter { font-size: 0.78rem; color: #6b7280; margin-left: 0.5rem; }
+
+    /* ── Corpus Health ── */
+    #corpus-health { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1.1rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+    #corpus-health h2 { border: none; margin: 0 0 0.75rem; padding: 0; font-size: 1rem; }
+    .badge-strong { color: #16a34a; font-weight: 700; font-size: 0.82rem; background: #dcfce7; padding: 2px 8px; border-radius: 10px; margin-left: 0.5rem; }
+    .badge-medium { color: #b45309; font-weight: 700; font-size: 0.82rem; background: #fef3c7; padding: 2px 8px; border-radius: 10px; margin-left: 0.5rem; }
+    .badge-weak   { color: #b91c1c; font-weight: 700; font-size: 0.82rem; background: #fee2e2; padding: 2px 8px; border-radius: 10px; margin-left: 0.5rem; }
+    .gates-table { font-size: 0.82rem; }
+    .gates-table th { font-size: 0.78rem; }
+    tr.gate-pass td:first-child::before { content: '✅ '; }
+    tr.gate-warn td { background: #fefce8; }
+    tr.gate-fail td { background: #fff1f2; }
+    .diagnostics { color: #6b7280; font-size: 0.82rem; font-style: italic; margin: 0.5rem 0 0; }
+
+    /* Contradictions */
+    .cont-high   { border-left:3px solid #dc2626; background:#fff1f2; padding:.45rem .75rem; margin:.35rem 0; border-radius:4px; font-size:.86rem; }
+    .cont-medium { border-left:3px solid #d97706; background:#fffbeb; padding:.45rem .75rem; margin:.35rem 0; border-radius:4px; font-size:.86rem; }
+    .cont-low    { border-left:3px solid #6b7280; background:#f9fafb; padding:.45rem .75rem; margin:.35rem 0; border-radius:4px; font-size:.86rem; }
+    /* Confidence badges */
+    .conf-gemini { font-size:.72rem; background:#dbeafe; color:#1d4ed8; padding:1px 6px; border-radius:8px; white-space:nowrap; }
+    .conf-regex  { font-size:.72rem; background:#f3f4f6; color:#6b7280; padding:1px 6px; border-radius:8px; white-space:nowrap; }
+    /* Evidence quote */
+    .evidence-q  { font-size:.78rem; color:#6b7280; font-style:italic; }
+  </style>
+</head>
+<body>
+
+<h1>OSINT Actor Report</h1>
+<p style="color:#6b7280;font-size:0.88rem;margin:0 0 1.2rem">
+  <strong>{{ seed }}</strong> &nbsp;·&nbsp; Actor ID: <code>{{ actor_id }}</code>
+</p>
+
+<!-- ═══ SUMMARY BLOCK ═══ -->
+<div class="summary-card">
+
+  <div class="stats-row">
+    <div class="stat"><div class="stat-num">{{ sources|length }}</div><div class="stat-lbl">Джерела</div></div>
+    <div class="stat"><div class="stat-num">{{ events|length }}</div><div class="stat-lbl">Події</div></div>
+    <div class="stat"><div class="stat-num">{{ statements|length }}</div><div class="stat-lbl">Цитати</div></div>
+    <div class="stat"><div class="stat-num">{{ links|length }}</div><div class="stat-lbl">Звʼязки</div></div>
+    <div class="stat"><div class="stat-num">{{ accounts|length }}</div><div class="stat-lbl">Акаунти</div></div>
+  </div>
+
+  {% if statements %}
+  <div>
+    <div class="section-label">Риторичні позиції</div>
+    <div class="rhetoric-row">
+      {% for rt, cnt in rhetoric_counts.items() %}
+      <span class="rcount rt-{{ rt }}" title="Фільтрувати" onclick="filterStmts('{{ rt }}', null)">{{ rt }}: {{ cnt }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <div style="font-size:0.83rem;color:#9ca3af;padding:0.4rem 0 0.9rem">
+    ⚠️ Цитати не знайдено — Gemini rate-limited або відсутні джерела типу interview/news/bio
+  </div>
+  {% endif %}
+
+  {% if source_type_counts %}
+  <div style="margin-bottom:0.9rem">
+    <div class="section-label">Типи джерел</div>
+    <div style="font-size:0.82rem;color:#374151">
+      {% for t, c in source_type_counts.items() %}
+      <span style="margin-right:0.8rem">{{ t }}: <strong>{{ c }}</strong></span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if risk_entities %}
+  <div class="risk-block">
+    <div class="section-label">⚠️ Ризик-зв'язки</div>
+    <ul class="risk-list">
+      {% for l in risk_entities %}
+      <li>
+        <span class="flag-risk">{{ l.flags | join(', ') }}</span>
+        — {{ l.subject_b }}
+        {% if l.link_type %}<span style="color:#6b7280">({{ l.link_type }}{% if l.period %}, {{ l.period }}{% endif %})</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="export-row">
+    <button class="btn" onclick="exportCSV('statements')" title="Цитати: date, rhetoric_type, platform, quote, summary">↓ Цитати CSV</button>
+    <button class="btn" onclick="exportCSV('sources')" title="Джерела: source_type, title, url, date_raw">↓ Джерела CSV</button>
+    <button class="btn btn-primary" onclick="exportJSON()">↓ Full JSON</button>
+  </div>
+
+</div>
+<!-- ═══ END SUMMARY ═══ -->
+
+
+<!-- ═══ CORPUS HEALTH ═══ -->
+{% if corpus_health_score is not none %}
+<div id="corpus-health">
+  <h2>Corpus Health — {{ "%.0f"|format(corpus_health_score * 100) }}%
+    <span class="badge-{{ quant_support or 'weak' }}">{{ quant_support or '?' }}</span>
+  </h2>
+  {% if quality_gates %}
+  <table class="gates-table">
+    <thead>
+      <tr><th>Gate</th><th>Статус</th><th>Тригери</th></tr>
+    </thead>
+    <tbody>
+      {% for gate, v in quality_gates.items() %}
+      <tr class="gate-{{ (v.status or 'unknown') | lower }}">
+        <td>{{ gate }}</td>
+        <td>{{ v.status }}</td>
+        <td style="color:#6b7280;font-size:0.8rem">{{ v.triggered_by | join(', ') if v.triggered_by else '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+  <details style="margin-top:0.75rem">
+    <summary style="cursor:pointer;font-size:0.8rem;color:#6b7280;user-select:none">▸ Пояснення критеріїв</summary>
+    <div style="margin-top:0.5rem;font-size:0.78rem;color:#374151;line-height:1.6">
+      <table style="width:100%;border-collapse:collapse;font-size:0.78rem">
+        <thead><tr style="background:#f9fafb"><th style="text-align:left;padding:3px 8px">Gate</th><th style="text-align:left;padding:3px 8px">Що перевіряє</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:3px 8px;white-space:nowrap">Coverage &amp; Diversity</td><td style="padding:3px 8px">≥35% унікальних доменів, mix типів джерел</td></tr>
+          <tr style="background:#f9fafb"><td style="padding:3px 8px;white-space:nowrap">Depth &amp; Noise</td><td style="padding:3px 8px">Shallow ≤10%, медіанний текст ≥300 символів</td></tr>
+          <tr><td style="padding:3px 8px;white-space:nowrap">Archive &amp; Temporal</td><td style="padding:3px 8px">Archive ratio ≤50%, date coverage ≥20%</td></tr>
+          <tr style="background:#f9fafb"><td style="padding:3px 8px;white-space:nowrap">Risk Signal</td><td style="padding:3px 8px">RU-домени ≤60%, rhetoric risk ≤35%</td></tr>
+          <tr><td style="padding:3px 8px;white-space:nowrap">Technical</td><td style="padding:3px 8px">Дублікати ≤15%</td></tr>
+        </tbody>
+      </table>
+      <p style="margin:.5rem 0 0;color:#9ca3af;font-size:0.75rem">
+        PASS = норма &nbsp;·&nbsp; WARN = увага &nbsp;·&nbsp; FAIL = проблема.<br>
+        Пороги задаються у профілі <code>benchmark_profiles/*.yaml</code>.
+        rhetoric_risk потребує Gemini NER (при rate-limit = 0).
+      </p>
+    </div>
+  </details>
+  {% if quality_metrics %}
+  <div style="font-size:0.8rem;color:#6b7280;margin-top:0.5rem">
+    Sources: <strong>{{ quality_metrics.source_count }}</strong> &nbsp;·&nbsp;
+    Domains: <strong>{{ quality_metrics.unique_domains }}</strong> &nbsp;·&nbsp;
+    Median text: <strong>{{ quality_metrics.median_text_length }}</strong> chars &nbsp;·&nbsp;
+    Shallow: <strong>{{ "%.1f"|format(quality_metrics.shallow_ratio * 100) }}%</strong>
+  </div>
+  {% endif %}
+  {% if quality_diagnostics %}
+  <p class="diagnostics">{{ quality_diagnostics }}</p>
+  {% endif %}
+  {% if temporal_gaps %}
+  <div style="margin-top:.5rem;font-size:.8rem;color:#b45309">
+    ⏱ Часові прогалини:
+    {% for g in temporal_gaps %}<span style="margin-right:.75rem">{{ g['from'][:4] }}–{{ g['to'][:4] }} ({{ g.months }} міс.)</span>{% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+<!-- ═══ END CORPUS HEALTH ═══ -->
+
+
+<!-- 1. Statements -->
+<h2>Висловлювання</h2>
+{% if statements %}
+<div class="filter-bar">
+  <span class="flbl">Фільтр:</span>
+  <button class="fbtn fbtn-all active" onclick="filterStmts('all', this)">Всі ({{ statements|length }})</button>
+  {% for rt, cnt in rhetoric_counts.items() %}
+  <button class="fbtn fbtn-{{ rt }}" onclick="filterStmts('{{ rt }}', this)">{{ rt }} ({{ cnt }})</button>
+  {% endfor %}
+  <span id="stmts-counter"></span>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width:90px">Дата</th>
+      <th>Цитата</th>
+      <th style="width:220px">Резюме</th>
+      <th style="width:90px">Платформа</th>
+      <th style="width:120px">War context</th>
+      <th style="width:130px">Позиція</th>
+      <th style="width:72px">Метод</th>
+    </tr>
+  </thead>
+  <tbody id="stmts-tbody">
+    {% for s in statements %}
+    <tr data-rt="{{ s.rhetoric_type or 'unknown' }}">
+      <td style="white-space:nowrap">{{ s.date or '—' }}</td>
+      <td>«{{ s.quote }}»</td>
+      <td style="color:#4b5563;font-size:0.82rem">{{ s.summary or '' }}</td>
+      <td>{{ s.platform or '—' }}</td>
+      <td class="war-ctx">{{ s.war_context or '' }}</td>
+      <td><span class="rt-{{ s.rhetoric_type or 'unknown' }}">{{ s.rhetoric_type or '—' }}</span></td>
+      <td>{% if s.summary == '[regex]' %}<span class="conf-regex">regex</span>{% else %}<span class="conf-gemini">Gemini</span>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">Висловлювань не знайдено.</p>
+{% endif %}
+
+
+<!-- 1b. Contradictions -->
+{% if contradictions %}
+<h2>⚡ Суперечності у висловлюваннях ({{ contradictions|length }})</h2>
+{% for c in contradictions %}
+<div class="cont-{{ c.severity or 'low' }}">
+  <strong>[{{ (c.severity or 'low')|upper }}] {{ c.contradiction_type or '' }}</strong>
+  — Statement #{{ c.idx_a }} vs #{{ c.idx_b }}
+  <span style="color:#374151;margin-left:.5rem">{{ c.note or '' }}</span>
+</div>
+{% endfor %}
+{% endif %}
+
+
+<!-- 2. Timeline -->
+<h2>Таймлайн подій</h2>
+{% if events %}
+<table>
+  <thead>
+    <tr><th style="width:90px">Дата</th><th>Подія</th><th style="width:110px">Місце</th><th style="width:130px">War context</th><th>Джерело</th></tr>
+  </thead>
+  <tbody>
+    {% for e in events %}
+    {% set src = sources_map.get(e.source_id, {}) %}
+    <tr>
+      <td style="white-space:nowrap">{{ e.date or '—' }}</td>
+      <td>{{ e.title }}</td>
+      <td>{{ e.location_id or '—' }}</td>
+      <td class="war-ctx">{{ e.war_context or '' }}</td>
+      <td><small>{% if src.url %}<a href="{{ src.url }}" target="_blank" rel="noopener">{{ src.url[:55] }}…</a>{% else %}{{ e.source_id or '' }}{% endif %}</small></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">Подій не знайдено.</p>
+{% endif %}
+
+
+<!-- 3. Network -->
+<h2>Мережа звʼязків</h2>
+{% if links %}
+<p style="font-size:0.8rem;color:#6b7280;margin:0 0 0.4rem">
+  Показано {{ links|length }} унікальних субʼєктів (відсортовано за наявністю ризик-міток).
+</p>
+<table>
+  <thead>
+    <tr><th>Організація / Особа</th><th style="width:110px">Тип звʼязку</th><th style="width:80px">Період</th><th>Контекст</th><th>Цитата-доказ</th><th style="width:140px">Ризик-мітки</th></tr>
+  </thead>
+  <tbody>
+    {% for l in links %}
+    <tr>
+      <td>{{ l.subject_b }}</td>
+      <td>{{ l.link_type or '—' }}</td>
+      <td>{{ l.period or '—' }}</td>
+      <td>{{ l.context or '' }}</td>
+      <td class="evidence-q">{{ l.evidence_quote or '' }}</td>
+      <td>{% if l.flags %}<span class="flag-risk">{{ l.flags | join(', ') }}</span>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">Звʼязків не знайдено.</p>
+{% endif %}
+
+
+<!-- 4. Accounts -->
+<h2>Акаунти</h2>
+{% if accounts %}
+<table>
+  <thead>
+    <tr><th style="width:100px">Платформа</th><th style="width:130px">Handle</th><th>URL</th><th>Bio</th><th style="width:90px">First seen</th></tr>
+  </thead>
+  <tbody>
+    {% for a in accounts %}
+    <tr>
+      <td>{{ a.platform }}</td>
+      <td>{{ a.handle or '—' }}</td>
+      <td><a href="{{ a.url or '#' }}" target="_blank" rel="noopener">{{ (a.url or '')[:65] }}{% if a.url and a.url|length > 65 %}…{% endif %}</a></td>
+      <td style="font-size:0.82rem;color:#4b5563">{{ a.bio or '' }}</td>
+      <td>{{ a.first_seen or '—' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">Акаунтів не знайдено.</p>
+{% endif %}
+
+
+<!-- 5. Geoclusters -->
+{% if geoclusters %}
+<h2>Просторово-часові кластери</h2>
+<table>
+  <thead>
+    <tr><th>Тип</th><th>Період</th><th>Місто</th><th>Країна</th><th style="width:100px">Кількість подій</th></tr>
+  </thead>
+  <tbody>
+    {% for g in geoclusters %}
+    {% set loc = locations_map.get(g.location_id, {}) %}
+    <tr>
+      <td>{{ g.type or '—' }}</td>
+      <td>{{ g.period or '—' }}</td>
+      <td>{{ (loc.city or g.location_id) if loc else g.location_id }}</td>
+      <td>{{ (loc.country or '—') if loc else '—' }}</td>
+      <td>{{ g.count }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+
+<!-- 6. Sources -->
+<h2>Джерела ({{ sources|length }})</h2>
+<table>
+  <thead>
+    <tr><th style="width:32px">#</th><th style="width:80px">Тип</th><th>Заголовок</th><th>URL</th><th style="width:90px">Дата</th></tr>
+  </thead>
+  <tbody>
+    {% for s in sources %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ s.source_type or '—' }}</td>
+      <td>{{ s.title or '—' }}<br><small style="color:#9ca3af;font-size:0.74rem">{{ s | dstu_cite }}</small></td>
+      <td><a href="{{ s.url or '#' }}" target="_blank" rel="noopener">{{ (s.url or '')[:65] }}{% if s.url and s.url|length > 65 %}…{% endif %}</a></td>
+      <td>{{ s.date_raw or '—' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+<script>
+const _statementsData = {{ statements_export | tojson }};
+const _sourcesData    = {{ sources_export | tojson }};
+
+/* ── Filter ── */
+function filterStmts(type, btn) {
+  const rows = document.querySelectorAll('#stmts-tbody tr');
+  let visible = 0;
+  rows.forEach(row => {
+    const show = type === 'all' || row.dataset.rt === type;
+    row.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  if (btn) {
+    btn.classList.add('active');
+  } else {
+    // called from rcount badge in summary — activate matching fbtn
+    const match = document.querySelector('.fbtn-' + type);
+    if (match) match.classList.add('active');
+  }
+  const counter = document.getElementById('stmts-counter');
+  if (counter) counter.textContent = type === 'all' ? '' : `(${visible} з ${rows.length})`;
+}
+
+/* ── Export helpers ── */
+function _toCSV(data, keys) {
+  if (!data.length) return keys.join(',') + '\n';
+  const esc = v => JSON.stringify(v == null ? '' : String(v));
+  return [keys.join(','), ...data.map(r => keys.map(k => esc(r[k])).join(','))].join('\n');
+}
+
+function _download(content, filename, mime) {
+  const blob = new Blob(['﻿' + content], { type: mime + ';charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 150);
+}
+
+function exportCSV(type) {
+  if (type === 'statements') {
+    _download(
+      _toCSV(_statementsData, ['date','rhetoric_type','platform','war_context','quote','summary','source_id']),
+      'statements.csv', 'text/csv'
+    );
+  } else {
+    _download(
+      _toCSV(_sourcesData, ['source_type','title','url','date_raw']),
+      'sources.csv', 'text/csv'
+    );
+  }
+}
+
+function exportJSON() {
+  const payload = {
+    seed: {{ seed | tojson }},
+    actor_id: {{ actor_id | tojson }},
+    generated_at: new Date().toISOString(),
+    statements: _statementsData,
+    sources: _sourcesData,
+  };
+  _download(JSON.stringify(payload, null, 2), 'osint_report.json', 'application/json');
+}
+</script>
+
+</body>
+</html>

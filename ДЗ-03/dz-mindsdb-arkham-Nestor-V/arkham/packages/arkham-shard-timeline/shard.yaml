@@ -1,0 +1,51 @@
+name: timeline
+version: 0.1.0
+description: Temporal event extraction and timeline visualization
+entry_point: arkham_shard_timeline:TimelineShard
+api_prefix: /api/timeline
+requires_frame: ">=0.1.0"
+
+navigation:
+  category: Visualize
+  order: 45
+  icon: Calendar
+  label: Timeline
+  route: /timeline
+
+dependencies:
+  services:
+    - database
+    - events
+  optional:
+    - documents
+    - entities
+  shards: []
+
+capabilities:
+  - timeline_construction
+  - date_extraction
+  - timeline_visualization
+  - conflict_detection
+  - date_normalization
+
+events:
+  publishes:
+    - timeline.timeline.extracted
+    - timeline.timeline.merged
+    - timeline.conflict.detected
+    - timeline.entity_timeline.built
+  subscribes:
+    - document.document.indexed
+    - document.document.deleted
+    - entity.entity.created
+
+state:
+  strategy: url
+  url_params:
+    - documentIds
+    - entityId
+    - startDate
+    - endDate
+
+ui:
+  has_custom_ui: true
