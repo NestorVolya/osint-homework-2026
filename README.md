@@ -1,62 +1,62 @@
-# OSINT Homework — Nestor V
+# OSINT Homework 2026 — Nestor V
 
-. Кейс: Чекаль Олексій Георгійович.
+Монорепозиторій курсу «AI для OSINT і розвідки» · Robot Dreams · 2026  
+**Студент:** Олександр Корнієнко · псевдо Nestor-V  
+**Інструменти:** Claude Code · OpenAI Codex · Gemini · Python · Docker · Gephi
 
-## Зміст
+---
 
-| Папка | ДЗ | Опис |
-|---|---|---|
-| [ДЗ-02-Nestor-V/](ДЗ-02-Nestor-V/) | ДЗ-02 | Промптинг, RAG, захист від ін'єкцій, LLM Guard |
-| [ДЗ-03/](ДЗ-03/) | ДЗ-03 | MindsDB + ArkhamMirror SHATTERED |
-| [ДЗ-04-Nestor-V/](ДЗ-04-Nestor-V/) | ДЗ-04 | Mini-pipeline: Crawl4AI + Playwright + Prometheus (risu.ua) |
-| [ДЗ-05-Nestor-V/](ДЗ-05-Nestor-V/) | ДЗ-05 | Entity Resolution, граф зв'язків, Flowsint (🔵+🔴) |
-| [ДЗ-06-Nestor-V/](ДЗ-06-Nestor-V/) | ДЗ-06 | Теорія графів: патентний граф БЕК, Gephi modularity, LLM cluster descriptions (🔵+🔴) |
-| [ДЗ-11-Nestor-V/](ДЗ-11-Nestor-V/) | ДЗ-11 | Міні-OSINT-звіт: операція Doppelganger (Italian campaign, 2022–2024) — клонування медіа, наративи, EEAS/Meta/Correctiv |
-| [ДЗ-12-Nestor-V/](ДЗ-12-Nestor-V/) | ДЗ-12 | Кластеризація Telegram-каналів: GroupInt, Neo4j, Gephi, gephi-ai MCP, endorsement-граф |
-| [ДЗ-17-Nestor-V/](ДЗ-17-Nestor-V/) | ДЗ-17 | Статистика в OSINT: виявлення ботів — описова статистика, кореляція, LogisticRegression, KMeans (🔵+🔴) |
-| [ДЗ-20-Nestor-V/](ДЗ-20-Nestor-V/) | ДЗ-20 | Юридичні аспекти OSINT: верифікація супутникового знімку Maxar (Буча, 19 березня 2022) за Берклійським протоколом (🔵) |
-| [КР-Nestor-V/](КР-Nestor-V/) | **КР** | Автоматизований OSINT pipeline: seed → SQLite + HTML/MD/JSON звіт + ZIP. Gemini NER, 5-gate corpus health, ДСТУ бібліографія. Gold actor: Чекаль (44 src, health=1.00, pytest 15/15) |
+## Курсова робота
 
-## Середовище та архітектура
+### [КР-Nestor-V/](КР-Nestor-V/) — actor-osint-front-СС
 
-Репозиторій живе у `D:\projects\` — workspace class **`producer_workspace`** за канонічною архітектурою `AI-Osint-EDU` (`D:\AI\ARCHITECTURE.md`).
+Автоматизований OSINT pipeline: **seed (ПІБ / нікнейм / email) → SQLite + HTML-досьє + JSON + ZIP**
 
-### Workspace roles (скорочено)
+**Напрям 1** — «Персони та соціальні мережі/геолокація»  
+**Gold actor:** Олексій Чекаль — 44 джерела · health = 1.00 · 5/5 gates PASS · pytest 15/15
 
-| Root | Class | Роль |
-|---|---|---|
-| `D:\AI` | `control_plane` | Архітектура, рішення, плани, логи |
-| `D:\projects\osint-homework-2026` | `producer_workspace` | Цей курс: sandbox, ДЗ, прототипи |
-| `D:\dev\osint-base` | `data_core` | Durable OSINT data core (схема, API, records) |
-| `ssh://hostinger-vps` | `vps_execution` | 24/7 сервіси, Docker runtime |
+| Компонент | Деталь |
+|---|---|
+| Пошук | Exa Search + Tavily + Google CSE + Wayback CDX |
+| Аналіз | Gemini 2.0-flash (NER, statements, contradictions) + spaCy fallback |
+| Візуалізація | pyvis граф акаунтів + Jinja2 HTML-досьє |
+| Якість | 5-gate Corpus Health Score (YAML benchmark profiles) |
+| Валідація | 4 актори: Чекаль + Braschi + Коваленко + Філоненко — всі PASS |
+| Архів | ZIP Evidence preservation (raw JSON + SQLite + report) |
 
-> Projects are replaceable. Data core is durable.
+---
 
-### Принцип: Local = розробка, VPS = виконання
+## Домашні завдання
 
-| | Local (Windows 10) | VPS (Ubuntu 24.04) |
-|---|---|---|
-| **Залізо** | i5-6500 · 16GB RAM · GTS 450 | 2 vCPU · 8GB RAM · 96GB SSD |
-| **Роль** | Аналіз, написання, git | 24/7 сервіси, Docker |
-| **Обмеження** | Локальні LLM неможливі (969MB VRAM) | dev/staging середовище |
-| **Доступ до VPS** | SSH port forwarding | — |
+| Папка | ДЗ | Тема | Рівень |
+|---|---|---|---|
+| [ДЗ-02-Nestor-V/](ДЗ-02-Nestor-V/) | ДЗ-02 | Промптинг, RAG, LLM Guard, захист від ін'єкцій | 🔵🔴 |
+| [ДЗ-03/](ДЗ-03/) | ДЗ-03 | MindsDB SQL + ArkhamMirror SHATTERED (28 shards) | 🔵🔴 |
+| [ДЗ-04-Nestor-V/](ДЗ-04-Nestor-V/) | ДЗ-04 | Mini-pipeline: Crawl4AI + Playwright + Prometheus (risu.ua) | 🔴 |
+| [ДЗ-05-Nestor-V/](ДЗ-05-Nestor-V/) | ДЗ-05 | Entity Resolution, граф зв'язків, Flowsint | 🔵🔴 |
+| [ДЗ-06-Nestor-V/](ДЗ-06-Nestor-V/) | ДЗ-06 | Теорія графів: патентний граф БЕК, Gephi, Louvain (Q=0.956, 702 communities) | 🔵🔴 |
+| [ДЗ-11-Nestor-V/](ДЗ-11-Nestor-V/) | ДЗ-11 | OSINT-звіт: операція Doppelganger (Italian campaign 2022–2024) | 🔵 |
+| [ДЗ-12-Nestor-V/](ДЗ-12-Nestor-V/) | ДЗ-12 | Telegram-кластеризація: GroupInt + Neo4j + Gephi + gephi-ai MCP | 🔵🔴 |
+| [ДЗ-17-Nestor-V/](ДЗ-17-Nestor-V/) | ДЗ-17 | Статистика: виявлення ботів — LogisticRegression + KMeans (500 акаунтів) | 🔵🔴 |
+| [ДЗ-20-Nestor-V/](ДЗ-20-Nestor-V/) | ДЗ-20 | Верифікація супутникового знімку Maxar (Буча) за Берклійським протоколом | 🔵 |
 
-### Стан по ДЗ
+---
 
-| ДЗ | Local | VPS |
-|---|---|---|
-| ДЗ-02 | RAG, промптинг, LLM Guard | — |
-| ДЗ-03 | MindsDB Studio (Docker Desktop) | — |
-| ДЗ-04 | Розробка, git push | Crawl4AI pipeline (Docker) |
-| ДЗ-05 🔵 | Entity table, pyvis граф, collision | — |
-| ДЗ-05 🔴 | SSH tunnel → браузер | Flowsint (`make prod`, 6 контейнерів) |
-| ДЗ-06 🔵🔴 | Gephi + Python (networkx, pandas) | — |
-| ДЗ-11 | OSINT-звіт: Doppelganger Italy (Markdown + HTML) | — |
-| ДЗ-12 🔵🔴 | Gephi + gephi-ai MCP + звіт | GroupInt + Neo4j у Docker через Traefik |
-| ДЗ-17 🔵🔴 | Jupyter + pandas/sklearn/scipy (Python 3.11 venv) | — |
-| **КР** | Python pipeline: Exa/Tavily/Gemini/spaCy/pyvis (venv) | — |
+## Наскрізний кейс
 
-### Стек
+Більшість ДЗ використовують єдиний об'єкт дослідження — **Олексій Чекаль** (каліграф, іконописець; публічна особа з задокументованими зв'язками в RU-сфері).
 
-Local: Python · pyvis · networkx · pandas · Gephi · git  
-VPS: Docker · Traefik · Flowsint · Crawl4AI · n8n · PostgreSQL + pgvector
+Кейс дозволив верифікувати pipeline проти ручного еталону: 167 Wikipedia footnotes → benchmark для Corpus Health Score.
+
+---
+
+## Стек
+
+| Шар | Технології |
+|---|---|
+| Пошук | Exa Search · Tavily · Google CSE · Wayback CDX · HIBP |
+| LLM | Gemini 2.0-flash · spaCy uk_core_news_sm · LLM Guard |
+| Графи | pyvis · networkx · Gephi · Neo4j |
+| Pipeline | Python 3.11 · Docker · Crawl4AI · Playwright · APScheduler |
+| Дані | SQLite · PostgreSQL + pgvector · JSON |
+| AI-агенти | Claude Code · OpenAI Codex · ChatGPT (діаграми) |
