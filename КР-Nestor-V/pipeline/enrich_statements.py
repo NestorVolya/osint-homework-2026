@@ -22,7 +22,7 @@ EXTRACTION_PROMPT = """Analyze the following text about a public figure and extr
 
 For each quote or statement found, return a JSON array with objects having these fields:
 - "quote": the exact or near-exact statement (string, max 300 chars)
-- "summary": 1-2 sentence summary of what the statement means (string)
+- "summary": 1-2 sentence summary of what the statement means (string, MUST be written in Ukrainian)
 - "date": date of the statement if mentioned (string, YYYY or YYYY-MM or YYYY-MM-DD, or "" if unknown)
 - "platform": where it was published (string, e.g. "interview", "facebook", "youtube", or "" if unknown)
 - "rhetoric_type": classify as one of: "neutral", "pro-ukrainian", "ambiguous", "bridge-building", "pro-russian", "unknown"
