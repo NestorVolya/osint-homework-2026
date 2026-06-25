@@ -290,6 +290,8 @@ python -m pipeline.run --seed "Олексій Чекаль" --seed_type fullname
 
 ## Приклад вихідного звіту
 
+![Demo — Олексій Чекаль report](docs/demoCHEKAL.gif)
+
 ```
 output/2026-06-06_23-31-12/          ← gold actor run
 ├── report/
