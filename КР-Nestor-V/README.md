@@ -78,24 +78,25 @@
 
 ### Multi-AI розробка
 
-| AI-система | Роль |
+| AI-система | Роль у проєкті |
 |---|---|
-| **Claude Code** | Основний партнер: архітектура, 15 модулів pipeline, тести, ADR, аудит |
+| **Claude Code** | `actor-osint-front-СС`: архітектура, 15 модулів pipeline, тести, ADR, аудит, стратегія |
+| **OpenAI Codex** | `actor-osint-front`: паралельна реалізація, federated search, social adapter framework |
 | **Gemini 2.0-flash** | Вбудований у pipeline: NER, statement extraction, contradiction detection |
-| **ChatGPT** | Допоміжна: діаграми для презентації, cross-validation аналізу, альтернативні погляди |
+| **ChatGPT** | Візуальні діаграми pipeline, cross-validation аналізу, альтернативні погляди |
 
 Підхід: не "AI пише за мене" — AI як **колега-розробник**. Рішення пояснюються, trade-offs документуються, відхилені варіанти записані в ADR.
 
 ### Порівняльний аудит: чому саме ця версія
 
-До фіксації фінальної бази — незалежний аудит 5 паралельних реалізацій ([повний звіт →](docs/COMPARATIVE_ANALYSIS.md)):
+До фіксації фінальної бази — незалежний аудит паралельних реалізацій ([повний звіт →](docs/COMPARATIVE_ANALYSIS.md)):
 
-| Реалізація | Тести | Validation | Звіт | Рішення |
-|---|:---:|:---:|:---:|:---:|
-| **actor-osint-front-СС** | ✅ 15/15 | ✅ 4 актори | ✅ 160KB HTML | **→ здача** |
-| actor-osint-front | ⚠️ smoke | ⚠️ застарів | ⚠️ мінімальний sample | референс: кращі ідеї пошуку |
-| osint-persona | ❌ без pytest | ❌ | ⚠️ | референс: username/email coverage |
-| (CODEX) / (ClaudeCode) | — | — | — | тільки діаграми для презентації |
+| Реалізація | AI-автор | Тести | Validation | Звіт | Рішення |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **actor-osint-front-СС** | **Claude Code** | ✅ 15/15 | ✅ 4 актори | ✅ 160KB HTML | **→ здача** |
+| actor-osint-front | OpenAI Codex | ⚠️ smoke | ⚠️ застарів | ⚠️ мінімальний sample | референс: пошукова методологія |
+| osint-persona | Claude Code | ❌ без pytest | ❌ | ⚠️ | референс: username/email coverage |
+| Visual diagrams | ChatGPT Image | — | — | — | діаграми для презентації |
 
 Критерій: не "більше функцій" — **validated на реальних акторах + документовані обмеження + відтворюваний запуск**.
 
